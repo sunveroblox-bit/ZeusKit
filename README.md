@@ -1,17 +1,28 @@
-# ⚡ ZeusKit v0.0.7
+# ZeusKit ⚡
+A professional mobile cybersecurity suite designed for Termux and Linux.
 
-> A modular, all-in-one mobile cybersecurity command center and defensive training lab built specifically for **Termux** on Android.
+## 🚀 Features
+- **DNS Resolution Suite**: Fast lookups using native Python and `dnspython`.
+- **Auto-Update System**: Check and pull updates directly from GitHub using option `[67]`.
+- **Anti-Skid Protection**: Built-in integrity checks and author verification (`sunveroblox-bit`).
 
-## 🚀 Overview
-**ZeusKit** is an interactive, menu-driven Python toolkit designed to help security enthusiasts and students understand networking concepts, reconnaissance techniques, and web server defense mechanics right from a mobile device.
+## 📥 Installation & Setup
 
-## 🛠️ Core Features
-* **[1] Nmap Reconnaissance Suite**
-* **[2] Web Server & Defense Suite (with Rate-Limiting / HTTP 429)**
-* **[3] Network & Recon Tools (`ifconfig`, `netstat`)**
-* **[4] DoS & Stress Test Suite & External Tool Runner**
-* **[5] DNS Finder Suite (with automated URL cleaning)**
-* **[10] Update Details (v0.0.7)**
+### For Termux (Android)
+```bash
+pkg update && pkg upgrade -y
+pkg install git python python-pip -y
+git clone [https://github.com/sunveroblox-bit/ZeusKit.git](https://github.com/sunveroblox-bit/ZeusKit.git)
+cd ZeusKit
+pip install -r requirements.txt
+python3 zeuskit.py
+```
 
-## ⚠️ Educational Disclaimer
-Intended strictly for educational purposes, self-hosted lab simulation, and authorized network analysis.
+### For Linux (Debian / Ubuntu / Kali)
+```bash
+sudo apt update && sudo apt install git python3 python3-pip -y
+git clone [https://github.com/sunveroblox-bit/ZeusKit.git](https://github.com/sunveroblox-bit/ZeusKit.git)
+cd ZeusKit
+pip install -r requirements.txt
+python3 zeuskit.py
+```
