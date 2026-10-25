@@ -1,4 +1,25 @@
 
+def check_for_updates():
+    print("\n[*] Checking for ZeusKit updates from GitHub...")
+    try:
+        import subprocess
+        # Fetch latest changes from remote
+        subprocess.run(["git", "fetch", "origin", "main"], capture_output=True, text=True, check=True)
+        
+        # Get local and remote commit hashes
+        local_commit = subprocess.run(["git", "rev-parse", "HEAD"], capture_output=True, text=True, check=True).stdout.strip()
+        remote_commit = subprocess.run(["git", "rev-parse", "origin/main"], capture_output=True, text=True, check=True).stdout.strip()
+        
+        if local_commit == remote_commit:
+            print("[+] ZeusKit is already up to date! No updates found.")
+        else:
+            print("[!] Update found! Downloading latest version...")
+            subprocess.run(["git", "pull", "origin", "main"], check=True)
+            print("[+] ZeusKit successfully updated! Please restart the script to apply changes.")
+    except Exception as e:
+        print(f"[!] Update check failed (Make sure you are connected to the internet and running in a Git repo): {e}")
+
+
 # ==========================================
 # ZEUSKIT ANTI-SKID / AUTHOR SIGNATURE
 # ==========================================
@@ -85,7 +106,7 @@ SERVER_HTML = """<!DOCTYPE html>
 
 class RateLimitedHandler(BaseHTTPRequestHandler):
     def log_message(self, format, *args):
-        print(f"[{self.log_date_time_string()}] {self.client_address[0]} - {args[0]}")
+        print(f"[{self.log_date_time_string()}] {self.client_address[67] Check for Updates\n    [0]} - {args[0]}")
     def is_rate_limited(self):
         client_ip = self.client_address[0]
         now = time.time()
