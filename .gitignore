@@ -1,0 +1,15 @@
+# Python bytecode & cache files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Environment and local settings
+.env
+.venv
+env/
+venv/
+
+# System files & OS metadata
+.DS_Store
+*.swp
+*.tmp
