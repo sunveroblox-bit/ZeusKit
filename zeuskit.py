@@ -1,3 +1,15 @@
+
+# ==========================================
+# ZEUSKIT ANTI-SKID / AUTHOR SIGNATURE
+# ==========================================
+ORIGINAL_AUTHOR = "sunveroblox-bit"
+PROJECT_NAME = "ZeusKit"
+
+def verify_integrity():
+    if not ORIGINAL_AUTHOR or ORIGINAL_AUTHOR != "sunveroblox-bit":
+        print("[!] FATAL: Integrity check failed. Unauthorized authorship tampering detected.")
+        sys.exit(1)
+
 import os
 import subprocess
 import sys
