@@ -23,7 +23,7 @@ except ImportError:
     print("[!] Error: colorama is not installed. Run: pip install -r requirements.txt")
     sys.exit(1)
 
-VERSION = "v0.5.0"
+VERSION = "v0.6.0"
 AUTHOR = "sunveroblox-bit"
 
 def banner():
@@ -406,6 +406,100 @@ def tool_50_process_list():
     os.system("ps aux")
 
 
+# --- SECTION 6: VULNERABILITY & INJECTION TEST TOOLS (NEW) ---
+
+def tool_51_sqli_test_simulator():
+    print(Fore.CYAN + "[+] Simulated SQLi Response Analyzer")
+    target_url = input(Fore.YELLOW + "Target URL with parameter (e.g. http://test.com/page.php?id=1): ").strip()
+    if not target_url.startswith("http"): target_url = "https://" + target_url
+    payloads = ["'", "\"", "OR '1'='1", "AND 1=1"]
+    sql_errors = ["sql syntax", "mysql_fetch", "syntax error", "unclosed quotation", "pg_query"]
+    
+    for p in payloads:
+        test_url = target_url + urllib.parse.quote(p)
+        try:
+            req = urllib.request.Request(test_url, headers={"User-Agent": "ZeusKit-SqliTester"})
+            html = urllib.request.urlopen(req, timeout=4).read().decode(errors="ignore").lower()
+            found_error = any(err in html for err in sql_errors)
+            if found_error:
+                print(Fore.RED + f"  [POTENTIAL VULNERABILITY] Payload '{p}' triggered database error indicators!")
+            else:
+                print(Fore.GREEN + f"  [SAFE/NO ERROR] Payload '{p}' returned standard response.")
+        except Exception as e:
+            print(Fore.YELLOW + f"  [SKIP] Payload '{p}' caused connection exception.")
+
+def tool_52_xss_test_simulator():
+    print(Fore.CYAN + "[+] Simulated XSS Reflection Tester")
+    target_url = input(Fore.YELLOW + "Target URL parameter endpoint: ").strip()
+    if not target_url.startswith("http"): target_url = "https://" + target_url
+    marker = "<script>zeuskit_test</script>"
+    test_url = target_url + urllib.parse.quote(marker)
+    try:
+        req = urllib.request.Request(test_url, headers={"User-Agent": "ZeusKit"})
+        html = urllib.request.urlopen(req, timeout=4).read().decode(errors="ignore")
+        if marker in html:
+            print(Fore.RED + f"  [REFLECTED XSS DETECTED] The exact test marker was found unescaped in response body!")
+        else:
+            print(Fore.GREEN + f"  [SECURE/ENCODED] Test marker was not reflected raw.")
+    except Exception as e:
+        print(Fore.RED + f"[!] Test error: {e}")
+
+def tool_53_cmd_injection_tester():
+    print(Fore.CYAN + "[+] Command Injection Payload Generator & Test Helper")
+    ip = input(Fore.YELLOW + "Target host/endpoint: ").strip()
+    print(Fore.GREEN + "[+] Test payloads for command execution injection:")
+    for sep in [";", "|", "&&", "`"]:
+        print(Fore.YELLOW + f"  Using separator '{sep}': id{sep}uname -a")
+
+def tool_54_rate_limit_test():
+    print(Fore.CYAN + "[+] HTTP Brute-Force Rate Limit / Throttling Tester")
+    u = input(Fore.YELLOW + "Target login or endpoint URL: ").strip()
+    if not u.startswith("http"): u = "https://" + u
+    requests_count = int(input(Fore.YELLOW + "Number of rapid test requests [5]: ").strip() or 5)
+    print(Fore.YELLOW + f"[*] Sending {requests_count} rapid sequential requests to {u}...")
+    
+    for i in range(1, requests_count + 1):
+        try:
+            start = time.time()
+            r = urllib.request.urlopen(urllib.request.Request(u, headers={"User-Agent": "ZeusKit-RateTester"}), timeout=3)
+            lat = (time.time() - start) * 1000
+            print(Fore.GREEN + f"  Req #{i}: Status {r.getcode()} | Latency: {lat:.1f} ms")
+        except urllib.error.HTTPError as e:
+            print(Fore.RED + f"  Req #{i}: HTTP Status {e.code} (Possible Rate Limiting / Blocking Triggered!)")
+        except Exception as e:
+            print(Fore.YELLOW + f"  Req #{i}: Failed ({e})")
+
+def tool_55_lfi_test_simulator():
+    print(Fore.CYAN + "[+] Path Traversal / LFI Test Simulator")
+    target_url = input(Fore.YELLOW + "Target URL parameter (e.g. http://test.com/page.php?file=): ").strip()
+    if not target_url.startswith("http"): target_url = "https://" + target_url
+    lfi_payloads = ["../../../../etc/passwd", "..%2f..%2f..%2f..%2fetc%2fpasswd", "/etc/hosts"]
+    
+    for p in lfi_payloads:
+        test_url = target_url + p
+        try:
+            html = urllib.request.urlopen(urllib.request.Request(test_url, headers={"User-Agent": "ZeusKit"}), timeout=3).read().decode(errors="ignore")
+            if "root:x:" in html or "localhost" in html:
+                print(Fore.RED + f"  [CRITICAL VULNERABILITY] Payload '{p}' exposed system file contents!")
+            else:
+                print(Fore.GREEN + f"  [SAFE] Payload '{p}' blocked or ignored.")
+        except Exception:
+            print(Fore.YELLOW + f"  [SKIP] Payload '{p}' failed request.")
+
+def tool_56_sensitive_file_scanner():
+    print(Fore.CYAN + "[+] Sensitive Backup & Config File Scanner")
+    domain = clean_url(input(Fore.YELLOW + "Target Domain: "))
+    files = [".env", ".git/config", "config.json", "backup.zip", "database.sql", "wp-config.php.bak", ".htaccess"]
+    for f in files:
+        url = f"https://{domain}/{f}"
+        try:
+            r = urllib.request.urlopen(urllib.request.Request(url, headers={"User-Agent": "ZeusKit"}), timeout=3)
+            print(Fore.GREEN + f"  [EXPOSED FOUND {r.getcode()}] /{f}")
+        except urllib.error.HTTPError as e:
+            if e.code == 403: print(Fore.YELLOW + f"  [FORBIDDEN 403] /{f}")
+        except Exception: pass
+
+
 # --- SUB-MENUS ---
 
 def menu_recon():
@@ -553,15 +647,37 @@ def menu_other():
         elif c == "0": break
         input(Fore.YELLOW + "\nPress Enter to continue...")
 
+def menu_testing():
+    while True:
+        print(Fore.CYAN + "\n=== [6] VULNERABILITY & INJECTION TEST TOOLS 🧪 ===")
+        print(" [1] Simulated SQLi Response Analyzer")
+        print(" [2] Simulated XSS Reflection Tester")
+        print(" [3] Command Injection Payload Tester")
+        print(" [4] HTTP Brute-Force Rate Limit / Throttling Tester")
+        print(" [5] Path Traversal / LFI Test Simulator")
+        print(" [6] Sensitive Backup & Config File Scanner")
+        print(" [0] Back to Main Menu")
+        
+        c = input(Fore.YELLOW + "Testing Tools > Selection: ").strip()
+        if c == "1": tool_51_sqli_test_simulator()
+        elif c == "2": tool_52_xss_test_simulator()
+        elif c == "3": tool_53_cmd_injection_tester()
+        elif c == "4": tool_54_rate_limit_test()
+        elif c == "5": tool_55_lfi_test_simulator()
+        elif c == "6": tool_56_sensitive_file_scanner()
+        elif c == "0": break
+        input(Fore.YELLOW + "\nPress Enter to continue...")
+
 def main():
     while True:
         banner()
-        print(Fore.CYAN + "=== ZEUSKIT v0.5.0 - MAIN CATEGORIES ===")
+        print(Fore.CYAN + "=== ZEUSKIT v0.6.0 - MAIN CATEGORIES ===")
         print(" [1] 🌐 Reconnaissance & Network Tools")
         print(" [2] 🔐 Code, Decode & Cryptography Section")
         print(" [3] 🔍 Web Analysis & OSINT Suite")
         print(" [4] ⚡ Attacking & Brute-Force Section")
         print(" [5] 🛠️ System Diagnostics & Utilities (Other)")
+        print(" [6] 🧪 Vulnerability & Injection Test Tools")
         print("[67] Check for GitHub Updates")
         print(" [0] Exit ZeusKit")
         print("--------------------------------------------------")
@@ -573,12 +689,13 @@ def main():
         elif choice == "3": menu_web_osint()
         elif choice == "4": menu_attacking()
         elif choice == "5": menu_other()
+        elif choice == "6": menu_testing()
         elif choice == "67": check_for_updates()
         elif choice == "0":
             print(Fore.CYAN + "[+] Exiting ZeusKit. Stay secure!")
             break
         else:
-            print(Fore.RED + "[!] Invalid selection. Choose 1-5 or 67.")
+            print(Fore.RED + "[!] Invalid selection. Choose 1-6 or 67.")
 
 if __name__ == "__main__":
     main()
