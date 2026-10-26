@@ -106,7 +106,7 @@ SERVER_HTML = """<!DOCTYPE html>
 
 class RateLimitedHandler(BaseHTTPRequestHandler):
     def log_message(self, format, *args):
-        print(f"[{self.log_date_time_string()}] {self.client_address[67] Check for Updates\n    [0]} - {args[0]}")
+        print(f"[{self.log_date_time_string()}] {self.client_address[0]} - {args[0]}")
     def is_rate_limited(self):
         client_ip = self.client_address[0]
         now = time.time()
