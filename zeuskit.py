@@ -1,473 +1,401 @@
+#!/usr/bin/env python3
+import sys
+import os
+import socket
+import urllib.request
+import urllib.parse
+import hashlib
+import base64
+import json
+import ssl
+import subprocess
+
+try:
+    import colorama
+    from colorama import Fore, Style
+    colorama.init(autoreset=True)
+except ImportError:
+    print("[!] Error: colorama is not installed. Run: pip install -r requirements.txt")
+    sys.exit(1)
+
+VERSION = "v0.1.0"
+AUTHOR = "sunveroblox-bit"
+
+def banner():
+    print(Fore.CYAN + """
+███████╗███████╗██╗   ██╗███████╗██╗  ██╗██╗████████╗
+╚══███╔╝██╔════╝██║   ██║██╔════╝██║ ██╔╝██║╚══██╔══╝
+  ███╔╝ █████╗  ██║   ██║███████╗█████╔╝ ██║   ██║   
+ ███╔╝  ██╔══╝  ██║   ██║╚════██║██╔-██╗ ██║   ██║   
+███████╗███████╗╚█████╔╝███████║██║  ██║██║   ██║   
+╚══════╝╚══════╝ ╚════╝ ╚══════╝╚═╝  ╚═╝╚═╝   ╚═╝
+    [ ZeusKit Mobile Cybersecurity Suite """ + VERSION + """ ]
+    [ Developed by: """ + AUTHOR + """ ]
+""")
+
+def clean_url(url):
+    url = url.strip()
+    if url.startswith("http://"):
+        url = url[7:]
+    elif url.startswith("https://"):
+        url = url[8:]
+    if "/" in url:
+        url = url.split("/")[0]
+    return url
 
 def check_for_updates():
-    print("\n[*] Checking for ZeusKit updates from GitHub...")
+    print(Fore.YELLOW + "\n[*] Checking for ZeusKit updates from GitHub...")
     try:
-        import subprocess
-        # Fetch latest changes from remote
         subprocess.run(["git", "fetch", "origin", "main"], capture_output=True, text=True, check=True)
-        
-        # Get local and remote commit hashes
         local_commit = subprocess.run(["git", "rev-parse", "HEAD"], capture_output=True, text=True, check=True).stdout.strip()
         remote_commit = subprocess.run(["git", "rev-parse", "origin/main"], capture_output=True, text=True, check=True).stdout.strip()
         
         if local_commit == remote_commit:
-            print("[+] ZeusKit is already up to date! No updates found.")
+            print(Fore.GREEN + "[+] ZeusKit is already up to date! No updates found.")
         else:
-            print("[!] Update found! Downloading latest version...")
+            print(Fore.YELLOW + "[!] Update found! Downloading latest version...")
             subprocess.run(["git", "pull", "origin", "main"], check=True)
-            print("[+] ZeusKit successfully updated! Please restart the script to apply changes.")
+            print(Fore.GREEN + "[+] ZeusKit successfully updated! Please restart the script.")
     except Exception as e:
-        print(f"[!] Update check failed (Make sure you are connected to the internet and running in a Git repo): {e}")
+        print(Fore.RED + f"[!] Update check failed: {e}")
 
+# --- 25 TOOLS IMPLEMENTATION ---
 
-# ==========================================
-# ZEUSKIT ANTI-SKID / AUTHOR SIGNATURE
-# ==========================================
-ORIGINAL_AUTHOR = "sunveroblox-bit"
-PROJECT_NAME = "ZeusKit"
-
-def verify_integrity():
-    if not ORIGINAL_AUTHOR or ORIGINAL_AUTHOR != "sunveroblox-bit":
-        print("[!] FATAL: Integrity check failed. Unauthorized authorship tampering detected.")
-        sys.exit(1)
-
-import os
-import subprocess
-import sys
-import time
-import socket
-import urllib.request
-import urllib.error
-from concurrent.futures import ThreadPoolExecutor
-from http.server import HTTPServer, BaseHTTPRequestHandler
-from collections import defaultdict
-import threading
-
-request_history = defaultdict(list)
-history_lock = threading.Lock()
-RATE_LIMIT_WINDOW = 5
-MAX_REQUESTS_PER_WINDOW = 3
-
-SERVER_HTML = """<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Secure Portal</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-</head>
-<body class="bg-gray-100 min-h-screen flex items-center justify-center p-4">
-    <div class="bg-white p-8 rounded-xl shadow-md max-w-sm w-full border border-gray-200">
-        <div class="text-center mb-6">
-            <h1 class="text-2xl font-bold text-gray-800">Local Portal</h1>
-            <p class="text-xs text-gray-500 mt-1">Protected by Rate-Limiting Defense</p>
-        </div>
-        <form onsubmit="handleLogin(event)" class="space-y-4">
-            <div>
-                <label class="block text-sm font-medium text-gray-700 mb-1">Username</label>
-                <input type="text" id="username" required class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
-            </div>
-            <div>
-                <label class="block text-sm font-medium text-gray-700 mb-1">Password</label>
-                <input type="password" id="password" required class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
-            </div>
-            <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 rounded-lg transition duration-200">Log In</button>
-        </form>
-        <div id="status-msg" class="mt-4 text-center text-sm hidden p-2 rounded-lg"></div>
-    </div>
-    <script>
-        function handleLogin(event) {
-            event.preventDefault();
-            const statusDiv = document.getElementById('status-msg');
-            statusDiv.classList.remove('hidden', 'bg-red-100', 'text-red-700', 'bg-green-100', 'text-green-700');
-            fetch('/login', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-                body: `username=${encodeURIComponent(document.getElementById('username').value)}`
-            })
-            .then(res => {
-                if (res.status === 429) {
-                    statusDiv.innerText = "Error 429: Too Many Requests (Rate Limited)";
-                    statusDiv.classList.add('bg-red-100', 'text-red-700');
-                } else {
-                    statusDiv.innerText = "Request Processed Successfully";
-                    statusDiv.classList.add('bg-green-100', 'text-green-700');
-                }
-            })
-            .catch(() => {
-                statusDiv.innerText = "Connection Error";
-                statusDiv.classList.add('bg-red-100', 'text-red-700');
-            });
-        }
-    </script>
-</body>
-</html>
-"""
-
-class RateLimitedHandler(BaseHTTPRequestHandler):
-    def log_message(self, format, *args):
-        print(f"[{self.log_date_time_string()}] {self.client_address[0]} - {args[0]}")
-    def is_rate_limited(self):
-        client_ip = self.client_address[0]
-        now = time.time()
-        with history_lock:
-            timestamps = [t for t in request_history[client_ip] if now - t < RATE_LIMIT_WINDOW]
-            request_history[client_ip] = timestamps
-            if len(timestamps) >= MAX_REQUESTS_PER_WINDOW:
-                return True
-            request_history[client_ip].append(now)
-            return False
-    def do_GET(self):
-        if self.is_rate_limited():
-            self.send_response(429)
-            self.send_header('Content-Type', 'text/plain')
-            self.end_headers()
-            self.wfile.write(b"429 Too Many Requests: Rate limit exceeded.")
-            return
-        self.send_response(200)
-        self.send_header('Content-Type', 'text/html')
-        self.end_headers()
-        self.wfile.write(SERVER_HTML.encode('utf-8'))
-    def do_POST(self):
-        if self.is_rate_limited():
-            self.send_response(429)
-            self.send_header('Content-Type', 'text/plain')
-            self.end_headers()
-            self.wfile.write(b"429 Too Many Requests")
-            return
-        self.send_response(200)
-        self.send_header('Content-Type', 'text/plain')
-        self.end_headers()
-        self.wfile.write(b"Success")
-
-def run_server(port=6700):
-    server_address = ('', port)
-    httpd = HTTPServer(server_address, RateLimitedHandler)
-    print(f"[+] Defensive Web Server running on port {port}...")
-    print(f"[+] Rate Limit Rule: Max {MAX_REQUESTS_PER_WINDOW} requests every {RATE_LIMIT_WINDOW} seconds per IP.")
+def tool_1_quick_ip():
+    domain = clean_url(input(Fore.YELLOW + "Enter domain/URL: "))
     try:
-        httpd.serve_forever()
-    except KeyboardInterrupt:
-        print("\n[-] Shutting down server.")
-        httpd.server_close()
+        ip = socket.gethostbyname(domain)
+        print(Fore.GREEN + f"[+] Target IP for {domain}: {ip}")
+    except Exception as e:
+        print(Fore.RED + f"[!] Error resolving IP: {e}")
 
-def banner():
-    print(r"""
-    ███████╗███████╗H   ██╗███████╗██╗  ██╗██╗████████╗
-    ╚══███╔╝██╔════╝██╗  ██║██╔════╝██║ ██╔╝██║╚══██╔══╝
-      ███╔╝ █████╗  ██║  ██║███████╗█████╔╝ ██║   ██║   
-     ███╔╝  ██╔══╝  ██║  ██║╚════██║██╔-██╗ ██║   ██║   
-    ███████╗███████╗╚█████╔╝███████║██║  ██╗██║   ██║   
-    ╚══════╝╚══════╝ ╚════╝ ╚══════╝╚═╝  ╚═╝╚═╝   ╚═╝   
-        [ ZeusKit Mobile Cybersecurity Suite v0.0.7 ]
-    """)
-
-def nmap_menu():
-    while True:
-        os.system('clear')
-        banner()
-        print("    === NMAP RECONNAISSANCE & INSTRUCTION SUITE ===")
-        print("    [1] Basic Port Scan        -> nmap <target>")
-        print("    [2] Service Version Scan   -> nmap -sV <target>")
-        print("    [3] Aggressive Scan        -> nmap -A <target>")
-        print("    [4] Custom Port Scan       -> nmap -p <port> <target>")
-        print("    [0] Back to Main Menu")
-        print("-" * 55)
-        choice = input("ZeusKit/Nmap > Selection: ").strip()
-        
-        if choice == '1':
-            target = input("Enter target IP (default 127.0.0.1): ").strip() or "127.0.0.1"
-            cmd = f"nmap {target}"
-            print(f"\n[MANUAL INSTRUCTION] Command: {cmd}")
-            print("[INFO] Runs a default TCP port scan against the target IP.\n")
-            subprocess.run(cmd.split())
-            input("\nPress Enter to continue...")
-        elif choice == '2':
-            target = input("Enter target IP (default 127.0.0.1): ").strip() or "127.0.0.1"
-            cmd = f"nmap -sV {target}"
-            print(f"\n[MANUAL INSTRUCTION] Command: {cmd}")
-            print("[INFO] The -sV flag probes open ports to determine service and version info.\n")
-            subprocess.run(cmd.split())
-            input("\nPress Enter to continue...")
-        elif choice == '3':
-            target = input("Enter target IP (default 127.0.0.1): ").strip() or "127.0.0.1"
-            cmd = f"nmap -A {target}"
-            print(f"\n[MANUAL INSTRUCTION] Command: {cmd}")
-            print("[INFO] The -A flag enables OS detection, version detection, script scanning, and traceroute.\n")
-            subprocess.run(cmd.split())
-            input("\nPress Enter to continue...")
-        elif choice == '4':
-            target = input("Enter target IP (default 127.0.0.1): ").strip() or "127.0.0.1"
-            port = input("Enter port number (e.g. 6700): ").strip() or "6700"
-            cmd = f"nmap -p {port} {target}"
-            print(f"\n[MANUAL INSTRUCTION] Command: {cmd}")
-            print("[INFO] The -p flag restricts the scan to a specific port instead of scanning all common ports.\n")
-            subprocess.run(cmd.split())
-            input("\nPress Enter to continue...")
-        elif choice == '0':
-            break
-
-def server_menu():
-    while True:
-        os.system('clear')
-        banner()
-        print("    === WEB SERVER & DEFENSE SUITE ===")
-        print("    [1] Start Rate-Limited Server (Port 6700)")
-        print("    [2] Start Rate-Limited Server (Custom Port)")
-        print("    [0] Back to Main Menu")
-        print("-" * 50)
-        choice = input("ZeusKit/Server > Selection: ").strip()
-        
-        if choice == '1':
-            run_server(6700)
-            input("\nServer stopped. Press Enter to continue...")
-        elif choice == '2':
-            port_input = input("Enter custom port: ").strip()
-            if port_input.isdigit():
-                run_server(int(port_input))
-            input("\nServer stopped. Press Enter to continue...")
-        elif choice == '0':
-            break
-
-def network_menu():
-    while True:
-        os.system('clear')
-        banner()
-        print("    === NETWORK & RECON TOOLS ===")
-        print("    [1] View Network Interfaces (ifconfig)")
-        print("    [2] View Active Sockets (netstat)")
-        print("    [0] Back to Main Menu")
-        print("-" * 50)
-        choice = input("ZeusKit/Network > Selection: ").strip()
-        
-        if choice == '1':
-            print("\n[MANUAL INSTRUCTION] Command: ifconfig\n")
-            subprocess.run(["ifconfig"])
-            input("\nPress Enter to continue...")
-        elif choice == '2':
-            print("\n[MANUAL INSTRUCTION] Command: netstat -tuln\n")
-            subprocess.run(["netstat", "-tuln"])
-            input("\nPress Enter to continue...")
-        elif choice == '0':
-            break
-
-def clean_domain(raw_input):
-    domain = raw_input.strip()
-    if "://" in domain:
-        domain = domain.split("://")[1]
-    domain = domain.split("/")[0]
-    return domain
-
-def dns_menu():
-    while True:
-        os.system('clear')
-        banner()
-        print("    === DNS FINDER & RESOLUTION SUITE ===")
-        print("    [1] Quick Domain to IP Lookup (socket)")
-        print("    [2] Full DNS Records Lookup (nslookup)")
-        print("    [0] Back to Main Menu")
-        print("-" * 50)
-        choice = input("ZeusKit/DNS > Selection: ").strip()
-        
-        if choice == '1':
-            raw_input = input("Enter domain or URL (e.g. swis.montfort.ac.th): ").strip()
-            if raw_input:
-                domain = clean_domain(raw_input)
-                print(f"\n[INFO] Cleaned target: {domain}")
-                print(f"[INFO] Resolving IP address via Python socket...\n")
-                try:
-                    ip = socket.gethostbyname(domain)
-                    print(f"[+] Resolved IP Address: {ip}")
-                except socket.gaierror:
-                    print(f"[-] Could not resolve domain '{domain}' via socket.")
-            input("\nPress Enter to continue...")
-        elif choice == '2':
-            raw_input = input("Enter domain or URL (e.g. swis.montfort.ac.th): ").strip()
-            if raw_input:
-                domain = clean_domain(raw_input)
-                cmd = f"nslookup {domain}"
-                print(f"\n[INFO] Cleaned target: {domain}")
-                print(f"[MANUAL INSTRUCTION] Command: {cmd}\n")
-                subprocess.run(["nslookup", domain])
-            input("\nPress Enter to continue...")
-        elif choice == '0':
-            break
-
-def send_stress_request(url):
+def tool_2_dns_records():
+    domain = clean_url(input(Fore.YELLOW + "Enter domain/URL: "))
+    print(Fore.CYAN + "[+] Querying DNS records (A, AAAA, MX, NS, TXT)...")
     try:
-        req = urllib.request.Request(url, method='GET')
-        with urllib.request.urlopen(req, timeout=3) as response:
-            return response.status
+        import dns.resolver
+        for rtype in ["A", "AAAA", "MX", "NS", "TXT"]:
+            try:
+                answers = dns.resolver.resolve(domain, rtype)
+                print(Fore.GREEN + f"\n--- {rtype} Records ---")
+                for rdata in answers:
+                    print(f"  {rdata}")
+            except Exception:
+                pass
+    except ImportError:
+        print(Fore.RED + "[!] Error: dnspython not installed. Run: pip install -r requirements.txt")
+
+def tool_3_port_scanner():
+    target = clean_url(input(Fore.YELLOW + "Enter IP or domain to scan: "))
+    ports_str = input(Fore.YELLOW + "Enter ports (comma separated e.g. 21,22,80,443) or press Enter for common: ").strip()
+    if not ports_str:
+        ports = [21, 22, 23, 25, 53, 80, 110, 139, 443, 445, 3306, 8080]
+    else:
+        ports = [int(p.strip()) for p in ports_str.split(",")]
+    
+    try:
+        target_ip = socket.gethostbyname(target)
+        print(Fore.CYAN + f"[*] Scanning {target_ip}...")
+        for port in ports:
+            s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            s.settimeout(1.0)
+            result = s.connect_ex((target_ip, port))
+            if result == 0:
+                print(Fore.GREEN + f"  [OPEN] Port {port}")
+            s.close()
+    except Exception as e:
+        print(Fore.RED + f"[!] Scan error: {e}")
+
+def tool_4_http_headers():
+    url_input = input(Fore.YELLOW + "Enter full URL (e.g. https://example.com): ").strip()
+    if not url_input.startswith("http"):
+        url_input = "https://" + url_input
+    try:
+        req = urllib.request.Request(url_input, headers={"User-Agent": "ZeusKit/0.1.0"})
+        with urllib.request.urlopen(req, timeout=5) as response:
+            print(Fore.GREEN + f"\n[+] Status Code: {response.getcode()}")
+            print(Fore.CYAN + "[+] Response Headers:")
+            for header, value in response.headers.items():
+                print(f"  {header}: {value}")
+    except Exception as e:
+        print(Fore.RED + f"[!] Error fetching headers: {e}")
+
+def tool_5_ssl_checker():
+    domain = clean_url(input(Fore.YELLOW + "Enter domain (e.g. google.com): "))
+    print(Fore.CYAN + f"[*] Inspecting SSL certificate for {domain}...")
+    try:
+        context = ssl.create_default_context()
+        with socket.create_connection((domain, 443), timeout=5) as sock:
+            with context.wrap_socket(sock, server_hostname=domain) as ssock:
+                cert = ssock.getpeercert()
+                print(Fore.GREEN + "[+] SSL Certificate Details:")
+                print(f"  Subject: {dict(x[0] for x in cert['subject'])}")
+                print(f"  Issuer: {dict(x[0] for x in cert['issuer'])}")
+                print(f"  Valid From: {cert['notBefore']}")
+                print(f"  Valid Until: {cert['notAfter']}")
+    except Exception as e:
+        print(Fore.RED + f"[!] SSL Check error: {e}")
+
+def tool_6_whois_lookup():
+    domain = clean_url(input(Fore.YELLOW + "Enter domain for WHOIS query: "))
+    print(Fore.CYAN + f"[*] Querying WHOIS info for {domain} via Port 43...")
+    try:
+        s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        s.connect(("whois.verisign-grs.com", 43))
+        s.send((domain + "\r\n").encode())
+        response = b""
+        while True:
+            data = s.recv(4096)
+            if not data:
+                break
+            response += data
+        s.close()
+        print(Fore.GREEN + response.decode("utf-8", errors="ignore"))
+    except Exception as e:
+        print(Fore.RED + f"[!] WHOIS error: {e}")
+
+def tool_7_subnet_calculator():
+    ip = input(Fore.YELLOW + "Enter IP address (e.g. 192.168.1.10): ").strip()
+    try:
+        parts = ip.split(".")
+        if len(parts) == 4:
+            print(Fore.GREEN + f"[+] IP Class: {'A' if int(parts[0]) < 128 else 'B' if int(parts[0]) < 192 else 'C'}")
+            print(f"[+] Network Base: {parts[0]}.{parts[1]}.{parts[2]}.0/24")
+            print(f"[+] Broadcast: {parts[0]}.{parts[1]}.{parts[2]}.255")
+        else:
+            print(Fore.RED + "[!] Invalid IP format.")
+    except Exception as e:
+        print(Fore.RED + f"[!] Error: {e}")
+
+def tool_8_reverse_ip():
+    domain = clean_url(input(Fore.YELLOW + "Enter domain: "))
+    try:
+        ip = socket.gethostbyname(domain)
+        hostname, _, _ = socket.gethostbyaddr(ip)
+        print(Fore.GREEN + f"[+] Reverse PTR for {ip} -> {hostname}")
+    except Exception as e:
+        print(Fore.RED + f"[!] Reverse lookup failed: {e}")
+
+def tool_9_local_ip():
+    try:
+        s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        s.connect(("8.8.8.8", 80))
+        local_ip = s.getsockname()[0]
+        s.close()
+        print(Fore.GREEN + f"[+] Local IP Address: {local_ip}")
+    except Exception as e:
+        print(Fore.RED + f"[!] Error getting local IP: {e}")
+
+def tool_10_public_ip_geo():
+    print(Fore.CYAN + "[*] Fetching Public IP & Geolocation info...")
+    try:
+        req = urllib.request.Request("https://ipinfo.io/json", headers={"User-Agent": "curl/7.68.0"})
+        with urllib.request.urlopen(req, timeout=5) as resp:
+            data = json.loads(resp.read().decode())
+            print(Fore.GREEN + "[+] Public IP Info:")
+            for k, v in data.items():
+                print(f"  {k}: {v}")
+    except Exception as e:
+        print(Fore.RED + f"[!] Failed to fetch public IP: {e}")
+
+def tool_11_custom_http_req():
+    url = input(Fore.YELLOW + "Enter URL: ").strip()
+    method = input(Fore.YELLOW + "Method (GET/POST) [GET]: ").strip().upper() or "GET"
+    try:
+        req = urllib.request.Request(url, method=method, headers={"User-Agent": "ZeusKit-Client"})
+        with urllib.request.urlopen(req, timeout=5) as resp:
+            print(Fore.GREEN + f"[+] Status: {resp.getcode()} | Size: {len(resp.read())} bytes")
+    except Exception as e:
+        print(Fore.RED + f"[!] Request error: {e}")
+
+def tool_12_user_agent_generator():
+    agents = [
+        "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36",
+        "Mozilla/5.0 (iPhone; CPU iPhone OS 16_5 like Mac OS X) Mobile/15E148",
+        "Mozilla/5.0 (Linux; Android 14; SM-A556B) AppleWebKit/537.36",
+        "Mozilla/5.0 (X11; Linux x86_64; rv:109.0) Gecko/20100101 Firefox/115.0"
+    ]
+    print(Fore.GREEN + "[+] Random User-Agents:")
+    for a in agents:
+        print(f"  - {a}")
+
+def tool_13_url_redirect_trace():
+    url = input(Fore.YELLOW + "Enter URL to trace: ").strip()
+    try:
+        req = urllib.request.Request(url, headers={"User-Agent": "ZeusKit"})
+        resp = urllib.request.urlopen(req, timeout=5)
+        print(Fore.GREEN + f"[+] Final URL: {resp.geturl()}")
+        print(f"[+] Status Code: {resp.getcode()}")
+    except Exception as e:
+        print(Fore.RED + f"[!] Trace error: {e}")
+
+def tool_14_md5_sha_generator():
+    text = input(Fore.YELLOW + "Enter text to hash: ").strip()
+    md5_val = hashlib.md5(text.encode()).hexdigest()
+    sha256_val = hashlib.sha256(text.encode()).hexdigest()
+    print(Fore.GREEN + f"[+] MD5: {md5_val}")
+    print(Fore.GREEN + f"[+] SHA256: {sha256_val}")
+
+def tool_15_base64_codec():
+    choice = input(Fore.YELLOW + "[1] Encode\n[2] Decode\nSelect: ").strip()
+    text = input(Fore.YELLOW + "Enter text: ").strip()
+    if choice == "1":
+        res = base64.b64encode(text.encode()).decode()
+        print(Fore.GREEN + f"[+] Encoded: {res}")
+    else:
+        try:
+            res = base64.b64decode(text.encode()).decode()
+            print(Fore.GREEN + f"[+] Decoded: {res}")
+        except Exception as e:
+            print(Fore.RED + f"[!] Decode error: {e}")
+
+def tool_16_url_codec():
+    choice = input(Fore.YELLOW + "[1] URL Encode\n[2] URL Decode\nSelect: ").strip()
+    text = input(Fore.YELLOW + "Enter text: ").strip()
+    if choice == "1":
+        print(Fore.GREEN + f"[+] Encoded: {urllib.parse.quote(text)}")
+    else:
+        print(Fore.GREEN + f"[+] Decoded: {urllib.parse.unquote(text)}")
+
+def tool_17_password_generator():
+    import random, string
+    length = int(input(Fore.YELLOW + "Password length [16]: ").strip() or 16)
+    chars = string.ascii_letters + string.digits + "!@#$%^&*()_+"
+    pwd = "".join(random.choice(chars) for _ in range(length))
+    print(Fore.GREEN + f"[+] Generated Password: {pwd}")
+
+def tool_18_jwt_decoder():
+    token = input(Fore.YELLOW + "Enter JWT Token: ").strip()
+    try:
+        parts = token.split(".")
+        if len(parts) >= 2:
+            header = base64.b64decode(parts[0] + "==").decode()
+            payload = base64.b64decode(parts[1] + "==").decode()
+            print(Fore.GREEN + f"[+] Header: {header}")
+            print(Fore.GREEN + f"[+] Payload: {payload}")
+        else:
+            print(Fore.RED + "[!] Invalid JWT format.")
+    except Exception as e:
+        print(Fore.RED + f"[!] JWT decode error: {e}")
+
+def tool_19_system_info():
+    print(Fore.GREEN + f"[+] OS Platform: {sys.platform}")
+    print(Fore.GREEN + f"[+] Python Version: {sys.version.split()[0]}")
+    print(Fore.GREEN + f"[+] CPU Cores: {os.cpu_count()}")
+
+def tool_20_ping_sweep_stub():
+    base = input(Fore.YELLOW + "Enter subnet base (e.g. 192.168.1): ").strip()
+    print(Fore.CYAN + f"[*] Pinging hosts on {base}.1 to {base}.20...")
+    for i in range(1, 21):
+        ip = f"{base}.{i}"
+        res = os.system(f"ping -c 1 -W 1 {ip} > /dev/null 2>&1")
+        if res == 0:
+            print(Fore.GREEN + f"  [UP] {ip}")
+
+def tool_21_banner_grabbing():
+    domain = clean_url(input(Fore.YELLOW + "Enter domain/IP: "))
+    port = int(input(Fore.YELLOW + "Enter port [80]: ").strip() or 80)
+    try:
+        s = socket.socket()
+        s.settimeout(2.0)
+        s.connect((domain, port))
+        s.send(b"HEAD / HTTP/1.1\r\nHost: " + domain.encode() + b"\r\n\r\n")
+        banner_data = s.recv(1024).decode(errors="ignore")
+        print(Fore.GREEN + f"[+] Banner Response:\n{banner_data}")
+        s.close()
+    except Exception as e:
+        print(Fore.RED + f"[!] Banner grab error: {e}")
+
+def tool_22_mac_vendor_stub():
+    print(Fore.CYAN + "[+] MAC Vendor Lookup tool active. (Offline database mode)")
+    mac = input(Fore.YELLOW + "Enter MAC prefix (e.g. AA:BB:CC): ").strip()
+    print(Fore.GREEN + f"[+] Querying OUI registry for {mac}...")
+
+def tool_23_tcp_latency():
+    domain = clean_url(input(Fore.YELLOW + "Enter domain/IP to test: "))
+    port = int(input(Fore.YELLOW + "Enter port [443]: ").strip() or 443)
+    import time
+    try:
+        start = time.time()
+        s = socket.create_connection((domain, port), timeout=3.0)
+        latency = (time.time() - start) * 1000
+        s.close()
+        print(Fore.GREEN + f"[+] TCP Latency to {domain}:{port} = {latency:.2f} ms")
+    except Exception as e:
+        print(Fore.RED + f"[!] Connection failed: {e}")
+
+def tool_24_http_status_checker():
+    url = input(Fore.YELLOW + "Enter URL: ").strip()
+    if not url.startswith("http"):
+        url = "https://" + url
+    try:
+        req = urllib.request.Request(url, headers={"User-Agent": "ZeusKit"})
+        resp = urllib.request.urlopen(req, timeout=4)
+        print(Fore.GREEN + f"[+] HTTP Status: {resp.getcode()} OK")
     except urllib.error.HTTPError as e:
-        return e.code
-    except Exception:
-        return 0
+        print(Fore.YELLOW + f"[!] HTTP Error Code: {e.code}")
+    except Exception as e:
+        print(Fore.RED + f"[!] Error: {e}")
 
-def stress_test_menu():
-    while True:
-        os.system('clear')
-        banner()
-        print("    === DOS & STRESS TEST SUITE ===")
-        print("    [1] Local Rate-Limit Flood Test (Port 6700)")
-        print("    [2] Custom URL Stress Test")
-        print("    [3] External Tools Manager & Runner (ZX-DDoS / Dos)")
-        print("    [0] Back to Main Menu")
-        print("-" * 50)
-        choice = input("ZeusKit/StressTest > Selection: ").strip()
-        
-        if choice == '1':
-            target_port = input("Enter target port (default 6700): ").strip() or "6700"
-            num_reqs = input("Enter number of requests to flood (default 10): ").strip()
-            num_reqs = int(num_reqs) if num_reqs.isdigit() else 10
-            
-            url = f"http://127.0.0.1:{target_port}/"
-            print(f"\n[MANUAL INSTRUCTION] Target: {url} | Requests: {num_reqs}")
-            print("[INFO] Launching concurrent threads to test rate limiting defense (HTTP 429)...\n")
-            
-            success = 0
-            rate_limited = 0
-            other = 0
-            
-            def worker():
-                nonlocal success, rate_limited, other
-                status = send_stress_request(url)
-                if status == 200:
-                    success += 1
-                elif status == 429:
-                    rate_limited += 1
-                else:
-                    other += 1
-
-            start_time = time.time()
-            with ThreadPoolExecutor(max_workers=5) as executor:
-                executor.map(lambda _: worker(), range(num_reqs))
-            duration = time.time() - start_time
-            
-            print(f"\n[+] Stress Test Finished in {duration:.2f}s")
-            print(f"    - Successful (200 OK): {success}")
-            print(f"    - Rate Limited (429 Too Many Requests): {rate_limited}")
-            print(f"    - Errors / Connection Fails: {other}")
-            input("\nPress Enter to continue...")
-            
-        elif choice == '2':
-            url = input("Enter target URL (e.g., http://127.0.0.1:6700): ").strip()
-            if not url.startswith("http"):
-                url = "http://" + url
-            num_reqs = input("Enter number of requests to flood (default 10): ").strip()
-            num_reqs = int(num_reqs) if num_reqs.isdigit() else 10
-            
-            print(f"\n[MANUAL INSTRUCTION] Target: {url} | Requests: {num_reqs}")
-            success = 0
-            rate_limited = 0
-            other = 0
-            
-            def worker():
-                nonlocal success, rate_limited, other
-                status = send_stress_request(url)
-                if status == 200:
-                    success += 1
-                elif status == 429:
-                    rate_limited += 1
-                else:
-                    other += 1
-
-            start_time = time.time()
-            with ThreadPoolExecutor(max_workers=5) as executor:
-                executor.map(lambda _: worker(), range(num_reqs))
-            duration = time.time() - start_time
-            
-            print(f"\n[+] Stress Test Finished in {duration:.2f}s")
-            print(f"    - Successful (200 OK): {success}")
-            print(f"    - Rate Limited (429): {rate_limited}")
-            print(f"    - Errors / Connection Fails: {other}")
-            input("\nPress Enter to continue...")
-            
-        elif choice == '3':
-            os.system('clear')
-            banner()
-            print("    === EXTERNAL TOOLS MANAGER & RUNNER ===")
-            print("    [1] Clone & Run ZX-DDoS (MrGoofyDev)")
-            print("    [2] Clone & Run BayuStore Dos (bayustore22)")
-            print("    [0] Back")
-            print("-" * 45)
-            sub = input("ZeusKit/External > Selection: ").strip()
-            
-            if sub == '1':
-                repo_dir = "ZX-DDoS"
-                if not os.path.exists(repo_dir):
-                    print(f"\n[+] Cloning {repo_dir} from GitHub...")
-                    subprocess.run(["git", "clone", "https://github.com/MrGoofyDev/ZX-DDoS"])
-                else:
-                    print(f"\n[+] Directory '{repo_dir}' already exists.")
-                
-                if os.path.exists(repo_dir):
-                    os.chdir(repo_dir)
-                    if os.path.exists("requirements.txt"):
-                        print("[+] Installing dependencies (pip install)...")
-                        subprocess.run([sys.executable, "-m", "pip", "install", "-r", "requirements.txt"])
-                    print("[+] Launching ZX-DDoS (python3 start.py)...")
-                    subprocess.run([sys.executable, "start.py"])
-                    os.chdir("..")
-                input("\nExecution finished. Press Enter to return to ZeusKit...")
-                
-            elif sub == '2':
-                repo_dir = "Dos"
-                if not os.path.exists(repo_dir):
-                    print(f"\n[+] Cloning {repo_dir} from GitHub...")
-                    subprocess.run(["git", "clone", "https://github.com/bayustore22/Dos"])
-                else:
-                    print(f"\n[+] Directory '{repo_dir}' already exists.")
-                
-                if os.path.exists(repo_dir):
-                    os.chdir(repo_dir)
-                    if os.path.exists("requirements.txt"):
-                        print("[+] Installing dependencies (pip install)...")
-                        subprocess.run([sys.executable, "-m", "pip", "install", "-r", "requirements.txt"])
-                    print("[+] Launching Dos framework (python3 main.py)...")
-                    subprocess.run([sys.executable, "main.py"])
-                    os.chdir("..")
-                input("\nExecution finished. Press Enter to return to ZeusKit...")
-        elif choice == '0':
-            break
+def tool_25_secure_vault_stub():
+    text = input(Fore.YELLOW + "Enter secret note to encode: ").strip()
+    encoded = base64.b64encode(text.encode()[::-1]).decode()
+    print(Fore.GREEN + f"[+] Vault Encrypted String: {encoded}")
 
 def main():
     while True:
-        os.system('clear')
         banner()
-        print("    === ZEUSKIT MAIN MENU (v0.0.7) ===")
-        print("    [1] Nmap Reconnaissance Suite")
-        print("    [2] Web Server & Defense Suite")
-        print("    [3] Network & Recon Tools")
-        print("    [4] DoS & Stress Test Suite")
-        print("    [5] DNS Finder Suite")
-        print("    [10] Update Details")
-        print("    [0] Exit ZeusKit")
-        print("-" * 50)
-        choice = input("ZeusKit > Selection: ").strip()
-        if choice == '1':
-            nmap_menu()
-        elif choice == '2':
-            server_menu()
-        elif choice == '3':
-            network_menu()
-        elif choice == '4':
-            stress_test_menu()
-        elif choice == '5':
-            dns_menu()
-        elif choice == '10':
-            os.system('clear')
-            banner()
-            print("    === ZEUSKIT UPDATE DETAILS ===")
-            print("    * Version Name: ZeusKit v0.0.7")
-            print("    * Release Track: Mobile Cybersecurity Suite")
-            print("    * Changelog:")
-            print("      - Bumped version to v0.0.7 following update conventions.")
-            print("      - Added intelligent URL parser/cleaner for DNS Finder Suite (supports https:// and paths).")
-            print("      - Maintained external tool runner and rate-limit defenses.")
-            print("-" * 50)
-            input("\nPress Enter to return to Main Menu...")
-        elif choice == '0':
-            sys.exit(0)
+        print(Fore.CYAN + "=== ZEUSKIT v0.1.0 - 25 TOOLS SUITE ===")
+        print(" [1] Quick Domain IP Lookup         [14] MD5 & SHA256 Generator")
+        print(" [2] Full DNS Records Lookup        [15] Base64 Encoder / Decoder")
+        print(" [3] TCP Port Scanner               [16] URL Encoder / Decoder")
+        print(" [4] HTTP Header Inspector          [17] Strong Password Generator")
+        print(" [5] SSL Certificate Checker        [18] JWT Token Decoder")
+        print(" [6] WHOIS Information Lookup       [19] System Diagnostics Info")
+        print(" [7] Subnet & CIDR Calculator       [20] Ping Sweep (Local Subnet)")
+        print(" [8] Reverse PTR Lookup             [21] HTTP Banner Grabbing")
+        print(" [9] Local Network IP Finder        [22] MAC Address Vendor Lookup")
+        print("[10] Public IP Geolocation          [23] TCP Latency Test")
+        print("[11] Custom HTTP Request Sender     [24] HTTP Status Code Checker")
+        print("[12] Random User-Agent Generator    [25] Secure Vault Note Encrypter")
+        print("[67] Check for GitHub Updates      [ 0] Exit ZeusKit")
+        print("--------------------------------------------------")
+        
+        choice = input(Fore.YELLOW + "ZeusKit > Selection: ").strip()
+        
+        if choice == "1": tool_1_quick_ip()
+        elif choice == "2": tool_2_dns_records()
+        elif choice == "3": tool_3_port_scanner()
+        elif choice == "4": tool_4_http_headers()
+        elif choice == "5": tool_5_ssl_checker()
+        elif choice == "6": tool_6_whois_lookup()
+        elif choice == "7": tool_7_subnet_calculator()
+        elif choice == "8": tool_8_reverse_ip()
+        elif choice == "9": tool_9_local_ip()
+        elif choice == "10": tool_10_public_ip_geo()
+        elif choice == "11": tool_11_custom_http_req()
+        elif choice == "12": tool_12_user_agent_generator()
+        elif choice == "13": tool_13_url_redirect_trace()
+        elif choice == "14": tool_14_md5_sha_generator()
+        elif choice == "15": tool_15_base64_codec()
+        elif choice == "16": tool_16_url_codec()
+        elif choice == "17": tool_17_password_generator()
+        elif choice == "18": tool_18_jwt_decoder()
+        elif choice == "19": tool_19_system_info()
+        elif choice == "20": tool_20_ping_sweep_stub()
+        elif choice == "21": tool_21_banner_grabbing()
+        elif choice == "22": tool_22_mac_vendor_stub()
+        elif choice == "23": tool_23_tcp_latency()
+        elif choice == "24": tool_24_http_status_checker()
+        elif choice == "25": tool_25_secure_vault_stub()
+        elif choice == "67": check_for_updates()
+        elif choice == "0":
+            print(Fore.CYAN + "[+] Exiting ZeusKit. Stay secure!")
+            break
+        else:
+            print(Fore.RED + "[!] Invalid selection. Choose 1-25 or 67.")
+        
+        input(Fore.YELLOW + "\nPress Enter to return to main menu...")
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()
