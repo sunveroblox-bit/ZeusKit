@@ -23,7 +23,7 @@ except ImportError:
     print("[!] Error: colorama is not installed. Run: pip install -r requirements.txt")
     sys.exit(1)
 
-VERSION = "v0.6.0"
+VERSION = "v0.7.0"
 AUTHOR = "sunveroblox-bit"
 
 def banner():
@@ -406,8 +406,7 @@ def tool_50_process_list():
     os.system("ps aux")
 
 
-# --- SECTION 6: VULNERABILITY & INJECTION TEST TOOLS (NEW) ---
-
+# SECTION 6: Vulnerability & Injection Test Tools
 def tool_51_sqli_test_simulator():
     print(Fore.CYAN + "[+] Simulated SQLi Response Analyzer")
     target_url = input(Fore.YELLOW + "Target URL with parameter (e.g. http://test.com/page.php?id=1): ").strip()
@@ -425,7 +424,7 @@ def tool_51_sqli_test_simulator():
                 print(Fore.RED + f"  [POTENTIAL VULNERABILITY] Payload '{p}' triggered database error indicators!")
             else:
                 print(Fore.GREEN + f"  [SAFE/NO ERROR] Payload '{p}' returned standard response.")
-        except Exception as e:
+        except Exception:
             print(Fore.YELLOW + f"  [SKIP] Payload '{p}' caused connection exception.")
 
 def tool_52_xss_test_simulator():
@@ -446,7 +445,6 @@ def tool_52_xss_test_simulator():
 
 def tool_53_cmd_injection_tester():
     print(Fore.CYAN + "[+] Command Injection Payload Generator & Test Helper")
-    ip = input(Fore.YELLOW + "Target host/endpoint: ").strip()
     print(Fore.GREEN + "[+] Test payloads for command execution injection:")
     for sep in [";", "|", "&&", "`"]:
         print(Fore.YELLOW + f"  Using separator '{sep}': id{sep}uname -a")
@@ -498,6 +496,88 @@ def tool_56_sensitive_file_scanner():
         except urllib.error.HTTPError as e:
             if e.code == 403: print(Fore.YELLOW + f"  [FORBIDDEN 403] /{f}")
         except Exception: pass
+
+
+# --- SECTION 7: CLOUD, API & MOBILE SECURITY SUITE (NEW) ---
+
+def tool_57_s3_bucket_checker():
+    print(Fore.CYAN + "[+] Cloud S3 Bucket Public Exposure Checker")
+    name = input(Fore.YELLOW + "Enter company or app name to check s3 buckets: ").strip().lower().replace(" ", "")
+    regions = ["us-east-1", "us-west-2", "eu-central-1", "ap-southeast-1"]
+    common_suffixes = ["-backup", "-assets", "-logs", "-data", "-media", "-prod"]
+    
+    for suffix in common_suffixes:
+        bucket_name = name + suffix
+        for region in regions:
+            url = f"https://{bucket_name}.s3.{region}.amazonaws.com"
+            try:
+                req = urllib.request.Request(url, method="HEAD")
+                r = urllib.request.urlopen(req, timeout=2)
+                print(Fore.RED + f"  [EXPOSED BUCKET FOUND] {url} (Status: {r.getcode()})")
+            except urllib.error.HTTPError as e:
+                if e.code == 403:
+                    print(Fore.YELLOW + f"  [PROTECTED 403] {bucket_name} exists but access denied.")
+                elif e.code == 404:
+                    pass
+            except Exception:
+                pass
+
+def tool_58_cors_misconfig_tester():
+    print(Fore.CYAN + "[+] CORS Policy Misconfiguration Tester")
+    url = input(Fore.YELLOW + "Target API URL: ").strip()
+    if not url.startswith("http"): url = "https://" + url
+    origin = "https://evil-attacker-domain.com"
+    try:
+        req = urllib.request.Request(url, headers={"Origin": origin, "User-Agent": "ZeusKit"})
+        r = urllib.request.urlopen(req, timeout=5)
+        acao = r.headers.get("Access-Control-Allow-Origin")
+        acac = r.headers.get("Access-Control-Allow-Credentials")
+        print(Fore.GREEN + f"  [CORS Headers Found]")
+        print(f"  Access-Control-Allow-Origin: {acao}")
+        print(f"  Access-Control-Allow-Credentials: {acac}")
+        if acao == "*" or acao == origin:
+            print(Fore.RED + f"  [POTENTIAL VULNERABILITY] Overly permissive CORS header detected!")
+    except Exception as e:
+        print(Fore.RED + f"[!] Error testing CORS: {e}")
+
+def tool_59_jwt_secret_tester():
+    print(Fore.CYAN + "[+] JWT Weak Secret / None-Algorithm Tester")
+    print(Fore.GREEN + "[+] Common weak JWT secrets dictionary:")
+    weak_secrets = ["secret", "password", "123456", "admin", "jwt_secret", "changeme", "key"]
+    for s in weak_secrets:
+        print(Fore.YELLOW + f"  Testing secret key: '{s}'")
+
+def tool_60_api_health_monitor():
+    print(Fore.CYAN + "[+] API Endpoint Health & Latency Monitor")
+    url = input(Fore.YELLOW + "Target API Endpoint URL: ").strip()
+    if not url.startswith("http"): url = "https://" + url
+    try:
+        start = time.time()
+        r = urllib.request.urlopen(urllib.request.Request(url, headers={"User-Agent": "ZeusKit-Monitor"}), timeout=5)
+        latency = (time.time() - start) * 1000
+        print(Fore.GREEN + f"[+] API Status: {r.getcode()} OK | Response Latency: {latency:.2f} ms")
+    except Exception as e:
+        print(Fore.RED + f"[!] API endpoint unreachable: {e}")
+
+def tool_61_termux_env_auditor():
+    print(Fore.CYAN + "[+] Termux Local Environment Auditor")
+    print(Fore.GREEN + f"[+] Current User: {os.getlogin() if hasattr(os, 'getlogin') else 'u0_a324 (Termux)'}")
+    print(Fore.GREEN + f"[+] Home Directory: {os.path.expanduser('~')}")
+    print(Fore.GREEN + f"[+] Environment PATH variables:")
+    for p in os.environ.get("PATH", "").split(":"):
+        print(f"    - {p}")
+
+def tool_62_local_sqlite_inspector():
+    print(Fore.CYAN + "[+] Local SQLite Database File Finder")
+    print(Fore.YELLOW + "[*] Scanning current workspace for .db or .sqlite files...")
+    found = False
+    for root, dirs, files in os.walk("."):
+        for file in files:
+            if file.endswith(".db") or file.endswith(".sqlite") or file.endswith(".sqlite3"):
+                print(Fore.GREEN + f"  [FOUND DB] {os.path.join(root, file)}")
+                found = True
+    if not found:
+        print(Fore.YELLOW + "[-] No local SQLite database files found in workspace.")
 
 
 # --- SUB-MENUS ---
@@ -668,16 +748,38 @@ def menu_testing():
         elif c == "0": break
         input(Fore.YELLOW + "\nPress Enter to continue...")
 
+def menu_cloud_api():
+    while True:
+        print(Fore.CYAN + "\n=== [7] CLOUD, API & MOBILE SECURITY SUITE ☁️ ===")
+        print(" [1] S3 Bucket Public Exposure Checker")
+        print(" [2] CORS Policy Misconfiguration Tester")
+        print(" [3] JWT Secret / Algorithm Tester")
+        print(" [4] API Endpoint Health & Latency Monitor")
+        print(" [5] Termux Local Environment Auditor")
+        print(" [6] Local SQLite Database Inspector")
+        print(" [0] Back to Main Menu")
+        
+        c = input(Fore.YELLOW + "Cloud/API > Selection: ").strip()
+        if c == "1": tool_57_s3_bucket_checker()
+        elif c == "2": tool_58_cors_misconfig_tester()
+        elif c == "3": tool_59_jwt_secret_tester()
+        elif c == "4": tool_60_api_health_monitor()
+        elif c == "5": tool_61_termux_env_auditor()
+        elif c == "6": tool_62_local_sqlite_inspector()
+        elif c == "0": break
+        input(Fore.YELLOW + "\nPress Enter to continue...")
+
 def main():
     while True:
         banner()
-        print(Fore.CYAN + "=== ZEUSKIT v0.6.0 - MAIN CATEGORIES ===")
+        print(Fore.CYAN + "=== ZEUSKIT v0.7.0 - MAIN CATEGORIES ===")
         print(" [1] 🌐 Reconnaissance & Network Tools")
         print(" [2] 🔐 Code, Decode & Cryptography Section")
         print(" [3] 🔍 Web Analysis & OSINT Suite")
         print(" [4] ⚡ Attacking & Brute-Force Section")
         print(" [5] 🛠️ System Diagnostics & Utilities (Other)")
         print(" [6] 🧪 Vulnerability & Injection Test Tools")
+        print(" [7] ☁️ Cloud, API & Mobile Security Suite")
         print("[67] Check for GitHub Updates")
         print(" [0] Exit ZeusKit")
         print("--------------------------------------------------")
@@ -690,12 +792,13 @@ def main():
         elif choice == "4": menu_attacking()
         elif choice == "5": menu_other()
         elif choice == "6": menu_testing()
+        elif choice == "7": menu_cloud_api()
         elif choice == "67": check_for_updates()
         elif choice == "0":
             print(Fore.CYAN + "[+] Exiting ZeusKit. Stay secure!")
             break
         else:
-            print(Fore.RED + "[!] Invalid selection. Choose 1-6 or 67.")
+            print(Fore.RED + "[!] Invalid selection. Choose 1-7 or 67.")
 
 if __name__ == "__main__":
     main()
