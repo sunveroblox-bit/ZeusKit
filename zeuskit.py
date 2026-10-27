@@ -15,6 +15,7 @@ import string
 import hmac
 import uuid
 import codecs
+import zlib
 
 try:
     import colorama
@@ -24,7 +25,7 @@ except ImportError:
     print("[!] Error: colorama is not installed. Run: pip install -r requirements.txt")
     sys.exit(1)
 
-VERSION = "v1.0.0"
+VERSION = "v1.0.1"
 AUTHOR = "sunveroblox-bit"
 TOTAL_TOOLS = 100
 
@@ -36,7 +37,7 @@ def banner():
  ███╔╝  ██╔══╝  ██║   ██║╚════██║██╔-██╗ ██║   ██║   
 ███████╗███████╗╚█████╔╝███████║██║  ██║██║   ██║   
 ╚══════╝╚══════╝ ╚════╝ ╚══════╝╚═╝  ╚═╝╚═╝   ╚═╝
-    [ ZeusKit Mobile Cybersecurity Suite """ + VERSION + """ (GRAND PUBLIC RELEASE) ]
+    [ ZeusKit Mobile Cybersecurity Suite """ + VERSION + """ (NAMED RELEASE) ]
     [ Developed by: """ + AUTHOR + """ | Total Tools: """ + str(TOTAL_TOOLS) + """ / 100 ]
 """)
 
@@ -63,9 +64,9 @@ def check_for_updates():
     except Exception as e:
         print(Fore.RED + f"[!] Update check failed: {e}")
 
-# --- ALL 100 TOOL IMPLEMENTATIONS ---
+# --- ALL 100 NAMED TOOL IMPLEMENTATIONS ---
 
-# SECTION 1: Recon & Network (1-15)
+# SECTION 1: Reconnaissance & Network Tools (1-15)
 def tool_1():
     d = clean_url(input(Fore.YELLOW + "Domain/URL: "))
     try: print(Fore.GREEN + f"[+] IP: {socket.gethostbyname(d)}")
@@ -242,12 +243,11 @@ def tool_29():
     print(Fore.GREEN + f"[+] Base32: {base64.b32encode(t.encode()).decode()}")
 
 def tool_30():
-    import zlib
     t = input(Fore.YELLOW + "Text: ").strip()
     print(Fore.GREEN + f"[+] CRC32 Checksum: {zlib.crc32(t.encode()) & 0xffffffff}")
 
 
-# SECTION 3: Web Analysis & OSINT (31-45)
+# SECTION 3: Web Analysis & OSINT Suite (31-45)
 def tool_31():
     d = clean_url(input(Fore.YELLOW + "Domain: "))
     try:
@@ -322,7 +322,7 @@ def tool_44(): print(Fore.CYAN + "[+] Sitemap.xml Parser Stub")
 def tool_45(): print(Fore.CYAN + "[+] CORS Policy Analyzer Stub")
 
 
-# SECTION 4: Attacking & Brute-Force (46-60)
+# SECTION 4: Attacking & Brute-Force Section (46-60)
 def tool_46():
     target = input(Fore.YELLOW + "Target IP/Domain: ").strip()
     os.system(f"hydra -l admin -P wordlist.txt {target} ssh")
@@ -410,113 +410,200 @@ def tool_99(): print(Fore.CYAN + "[+] Shellcode NOP Sled Generator")
 def tool_100(): print(Fore.CYAN + "[+] Automated Report & Log Exporter")
 
 
-# --- SUB-MENUS ---
+# --- FULLY NAMED SUB-MENUS ---
 
 def menu_1():
     while True:
-        print(Fore.CYAN + "\n=== [1] RECONNAISSANCE & NETWORK (15 Tools) ===")
-        for i in range(1, 16): print(f" [{i}] Recon Tool #{i}")
-        print(" [0] Back")
-        c = input(Fore.YELLOW + "Selection: ").strip()
-        if c == "1": tool_1()
-        elif c == "2": tool_2()
-        elif c == "3": tool_3()
-        elif c == "4": tool_4()
-        elif c == "5": tool_5()
-        elif c == "6": tool_6()
-        elif c == "7": tool_7()
-        elif c == "8": tool_8()
-        elif c == "9": tool_9()
-        elif c == "10": tool_10()
-        elif c == "11": tool_11()
-        elif c == "12": tool_12()
-        elif c == "13": tool_13()
-        elif c == "14": tool_14()
-        elif c == "15": tool_15()
+        print(Fore.CYAN + "\n=== [1] RECONNAISSANCE & NETWORK TOOLS ===")
+        print(" [1] Quick Domain IP Lookup")
+        print(" [2] Full DNS Records Lookup")
+        print(" [3] TCP Port Scanner")
+        print(" [4] HTTP Header Inspector")
+        print(" [5] SSL Certificate Checker")
+        print(" [6] WHOIS Information Lookup")
+        print(" [7] Subnet & CIDR Calculator")
+        print(" [8] Reverse PTR Lookup")
+        print(" [9] Local Network IP Finder")
+        print("[10] Public IP Geolocation")
+        print("[11] Custom HTTP Request Sender")
+        print("[12] Random User-Agent Generator")
+        print("[13] URL Redirect Trace")
+        print("[14] Autonomous System (ASN) Lookup")
+        print("[15] DNS Resolution Latency Test")
+        print(" [0] Back to Main Menu")
+        
+        c = input(Fore.YELLOW + "Recon > Selection: ").strip()
+        mapping = {str(i): globals()[f"tool_{i}"] for i in range(1, 16)}
+        if c in mapping: mapping[c]()
         elif c == "0": break
-        input(Fore.YELLOW + "\nPress Enter...")
+        input(Fore.YELLOW + "\nPress Enter to continue...")
 
 def menu_2():
     while True:
-        print(Fore.CYAN + "\n=== [2] CODE, DECODE & CRYPTOGRAPHY (15 Tools) ===")
-        for i in range(16, 31): print(f" [{i}] Crypto Tool #{i}")
-        print(" [0] Back")
-        c = input(Fore.YELLOW + "Selection: ").strip()
+        print(Fore.CYAN + "\n=== [2] CODE, DECODE & CRYPTOGRAPHY SECTION ===")
+        print(" [16] Multi-Hash Generator (MD5/SHA256)")
+        print(" [17] Base64 Encoder / Decoder")
+        print(" [18] URL Encoder / Decoder")
+        print(" [19] Strong Password Generator")
+        print(" [20] JWT Token Decoder")
+        print(" [21] Hex Encoder / Decoder")
+        print(" [22] Binary Encoder / Decoder")
+        print(" [23] Epoch / Unix Timestamp Tool")
+        print(" [24] UUIDv4 Generator")
+        print(" [25] HMAC-SHA256 Generator")
+        print(" [26] XOR Cipher Tool")
+        print(" [27] ROT13 Cipher")
+        print(" [28] SHA3-256 Advanced Hasher")
+        print(" [29] Base32 Encoder / Decoder")
+        print(" [30] CRC32 Checksum Calculator")
+        print(" [ 0] Back to Main Menu")
+        
+        c = input(Fore.YELLOW + "Code/Decode > Selection: ").strip()
         mapping = {str(i): globals()[f"tool_{i}"] for i in range(16, 31)}
         if c in mapping: mapping[c]()
         elif c == "0": break
-        input(Fore.YELLOW + "\nPress Enter...")
+        input(Fore.YELLOW + "\nPress Enter to continue...")
 
 def menu_3():
     while True:
-        print(Fore.CYAN + "\n=== [3] WEB ANALYSIS & OSINT (15 Tools) ===")
-        for i in range(31, 46): print(f" [{i}] Web Tool #{i}")
-        print(" [0] Back")
-        c = input(Fore.YELLOW + "Selection: ").strip()
+        print(Fore.CYAN + "\n=== [3] WEB ANALYSIS & OSINT SUITE ===")
+        print(" [31] Robots.txt Parser & Crawler")
+        print(" [32] Subdomain Enumerator Stub")
+        print(" [33] Security Headers Checker")
+        print(" [34] HTML Page Title Grabber")
+        print(" [35] Phishing Site Cloner Tool")
+        print(" [36] Directory Path Brute-Forcer")
+        print(" [37] HTTP Cookie Inspector")
+        print(" [38] Favicon Hash Calculator")
+        print(" [39] CMS Detector Heuristic")
+        print(" [40] HTTP OPTIONS Method Checker")
+        print(" [41] Open Redirect Checker")
+        print(" [42] Clickjacking Auditor")
+        print(" [43] Meta Tags & SEO Extractor")
+        print(" [44] Sitemap.xml Parser")
+        print(" [45] CORS Policy Analyzer")
+        print(" [ 0] Back to Main Menu")
+        
+        c = input(Fore.YELLOW + "Web/OSINT > Selection: ").strip()
         mapping = {str(i): globals()[f"tool_{i}"] for i in range(31, 46)}
         if c in mapping: mapping[c]()
         elif c == "0": break
-        input(Fore.YELLOW + "\nPress Enter...")
+        input(Fore.YELLOW + "\nPress Enter to continue...")
 
 def menu_4():
     while True:
-        print(Fore.CYAN + "\n=== [4] ATTACKING & BRUTE-FORCE (15 Tools) ===")
-        for i in range(46, 61): print(f" [{i}] Attack Tool #{i}")
-        print(" [0] Back")
-        c = input(Fore.YELLOW + "Selection: ").strip()
+        print(Fore.CYAN + "\n=== [4] ATTACKING & BRUTE-FORCE SECTION ===")
+        print(" [46] Hydra Brute-Force Wrapper  🔥")
+        print(" [47] Hash Dictionary Cracker")
+        print(" [48] Netcat Reverse Shell Helper")
+        print(" [49] XSS Payload Generator")
+        print(" [50] SQL Injection Payload Helper")
+        print(" [51] LFI Path Traversal Payloads")
+        print(" [52] Reverse Shell Generator One-Liners")
+        print(" [53] FTP Anonymous Login Tester")
+        print(" [54] Telnet Default Credential Tester")
+        print(" [55] SSH Banner Version Auditor")
+        print(" [56] DNS Zone Transfer Attack Simulator")
+        print(" [57] HTTP Basic Auth Brute-Forcer")
+        print(" [58] Web Form Brute-Forcer")
+        print(" [59] SIP Extension Enumerator")
+        print(" [60] SNMP Community Checker")
+        print(" [ 0] Back to Main Menu")
+        
+        c = input(Fore.YELLOW + "Attack > Selection: ").strip()
         mapping = {str(i): globals()[f"tool_{i}"] for i in range(46, 61)}
         if c in mapping: mapping[c]()
         elif c == "0": break
-        input(Fore.YELLOW + "\nPress Enter...")
+        input(Fore.YELLOW + "\nPress Enter to continue...")
 
 def menu_5():
     while True:
-        print(Fore.CYAN + "\n=== [5] SYSTEM DIAGNOSTICS & UTILITIES (15 Tools) ===")
-        for i in range(61, 76): print(f" [{i}] System Tool #{i}")
-        print(" [0] Back")
-        c = input(Fore.YELLOW + "Selection: ").strip()
+        print(Fore.CYAN + "\n=== [5] SYSTEM DIAGNOSTICS & UTILITIES ===")
+        print(" [61] System Diagnostics Info")
+        print(" [62] Ping Sweep (Local Subnet)")
+        print(" [63] HTTP Banner Grabbing")
+        print(" [64] TCP Latency Test")
+        print(" [65] HTTP Status Code Checker")
+        print(" [66] Secure Vault Note Encrypter")
+        print(" [67] Local ARP Cache Viewer")
+        print(" [68] Password Strength Analyzer")
+        print(" [69] Disk Storage Usage (df)")
+        print(" [70] Active Processes (ps)")
+        print(" [71] Environment Variables Viewer")
+        print(" [72] Network Interfaces Viewer")
+        print(" [73] Active Socket Listeners (ss)")
+        print(" [74] CPU/Memory Monitor")
+        print(" [75] Temp File Cleanup Utility")
+        print(" [ 0] Back to Main Menu")
+        
+        c = input(Fore.YELLOW + "Other > Selection: ").strip()
         mapping = {str(i): globals()[f"tool_{i}"] for i in range(61, 76)}
         if c in mapping: mapping[c]()
         elif c == "0": break
-        input(Fore.YELLOW + "\nPress Enter...")
+        input(Fore.YELLOW + "\nPress Enter to continue...")
 
 def menu_6():
     while True:
-        print(Fore.CYAN + "\n=== [6] VULNERABILITY & INJECTION TEST TOOLS (10 Tools) ===")
-        for i in range(76, 86): print(f" [{i}] Test Tool #{i}")
-        print(" [0] Back")
-        c = input(Fore.YELLOW + "Selection: ").strip()
+        print(Fore.CYAN + "\n=== [6] VULNERABILITY & INJECTION TEST TOOLS 🧪 ===")
+        print(" [76] Simulated SQLi Response Analyzer")
+        print(" [77] Simulated XSS Reflection Tester")
+        print(" [78] Command Injection Payload Tester")
+        print(" [79] HTTP Brute-Force Rate Limit Tester")
+        print(" [80] Path Traversal / LFI Test Simulator")
+        print(" [81] Sensitive Backup & Config File Scanner")
+        print(" [82] Prototype Pollution Test")
+        print(" [83] XXE Payload Helper")
+        print(" [84] SSRF Payload Helper")
+        print(" [85] Insecure Deserialization Helper")
+        print(" [ 0] Back to Main Menu")
+        
+        c = input(Fore.YELLOW + "Testing Tools > Selection: ").strip()
         mapping = {str(i): globals()[f"tool_{i}"] for i in range(76, 86)}
         if c in mapping: mapping[c]()
         elif c == "0": break
-        input(Fore.YELLOW + "\nPress Enter...")
+        input(Fore.YELLOW + "\nPress Enter to continue...")
 
 def menu_7():
     while True:
-        print(Fore.CYAN + "\n=== [7] CLOUD, API & MOBILE SECURITY SUITE (7 Tools) ===")
-        for i in range(86, 93): print(f" [{i}] Cloud/API Tool #{i}")
-        print(" [0] Back")
-        c = input(Fore.YELLOW + "Selection: ").strip()
+        print(Fore.CYAN + "\n=== [7] CLOUD, API & MOBILE SECURITY SUITE ☁️ ===")
+        print(" [86] S3 Bucket Public Exposure Checker")
+        print(" [87] CORS Policy Misconfiguration Tester")
+        print(" [88] JWT Secret / Algorithm Tester")
+        print(" [89] API Endpoint Health Monitor")
+        print(" [90] Termux Local Environment Auditor")
+        print(" [91] Local SQLite Database Inspector")
+        print(" [92] Firebase Public Endpoint Checker")
+        print(" [ 0] Back to Main Menu")
+        
+        c = input(Fore.YELLOW + "Cloud/API > Selection: ").strip()
         mapping = {str(i): globals()[f"tool_{i}"] for i in range(86, 93)}
         if c in mapping: mapping[c]()
         elif c == "0": break
-        input(Fore.YELLOW + "\nPress Enter...")
+        input(Fore.YELLOW + "\nPress Enter to continue...")
 
 def menu_8():
     while True:
-        print(Fore.CYAN + "\n=== [8] WIRELESS, FORENSICS & ADVANCED EXPLOITS (8 Tools) ===")
-        for i in range(93, 101): print(f" [{i}] Advanced Tool #{i}")
-        print(" [0] Back")
-        c = input(Fore.YELLOW + "Selection: ").strip()
+        print(Fore.CYAN + "\n=== [8] WIRELESS, FORENSICS & ADVANCED EXPLOITS 📡 ===")
+        print(" [93] Wi-Fi Beacon Frame Monitor")
+        print(" [94] Bluetooth Device Scanner")
+        print(" [95] PE / ELF Binary Header Inspector")
+        print(" [96] Embedded String Extractor Tool")
+        print(" [97] File Hash Integrity Baseline Checker")
+        print(" [98] Bad Characters Generator for Shellcode")
+        print(" [99] Shellcode NOP Sled Generator")
+        print("[100] Automated Report & Log Exporter")
+        print(" [  0] Back to Main Menu")
+        
+        c = input(Fore.YELLOW + "Advanced > Selection: ").strip()
         mapping = {str(i): globals()[f"tool_{i}"] for i in range(93, 101)}
         if c in mapping: mapping[c]()
         elif c == "0": break
-        input(Fore.YELLOW + "\nPress Enter...")
+        input(Fore.YELLOW + "\nPress Enter to continue...")
 
 def main():
     while True:
         banner()
-        print(Fore.CYAN + f"=== ZEUSKIT v1.0.0 - GRAND PUBLIC RELEASE ({TOTAL_TOOLS} TOOLS LOADED) ===")
+        print(Fore.CYAN + f"=== ZEUSKIT v1.0.1 - NAMED PUBLIC RELEASE ({TOTAL_TOOLS} TOOLS) ===")
         print(" [1] 🌐 Reconnaissance & Network Tools        (15 Tools)")
         print(" [2] 🔐 Code, Decode & Cryptography Section (15 Tools)")
         print(" [3] 🔍 Web Analysis & OSINT Suite          (15 Tools)")
@@ -541,7 +628,7 @@ def main():
         elif choice == "8": menu_8()
         elif choice == "67": check_for_updates()
         elif choice == "0":
-            print(Fore.CYAN + "[+] Exiting ZeusKit. Stay secure and congratulations on v1.0.0!")
+            print(Fore.CYAN + "[+] Exiting ZeusKit. Stay secure!")
             break
         else:
             print(Fore.RED + "[!] Invalid selection. Choose 1-8 or 67.")
