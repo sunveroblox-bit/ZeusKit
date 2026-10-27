@@ -23,8 +23,9 @@ except ImportError:
     print("[!] Error: colorama is not installed. Run: pip install -r requirements.txt")
     sys.exit(1)
 
-VERSION = "v0.7.0"
+VERSION = "v0.8.0"
 AUTHOR = "sunveroblox-bit"
+TOTAL_TOOLS = 62
 
 def banner():
     print(Fore.CYAN + """
@@ -35,7 +36,7 @@ def banner():
 ███████╗███████╗╚█████╔╝███████║██║  ██║██║   ██║   
 ╚══════╝╚══════╝ ╚════╝ ╚══════╝╚═╝  ╚═╝╚═╝   ╚═╝
     [ ZeusKit Mobile Cybersecurity Suite """ + VERSION + """ ]
-    [ Developed by: """ + AUTHOR + """ ]
+    [ Developed by: """ + AUTHOR + """ | Total Tools: """ + str(TOTAL_TOOLS) + """ ]
 """)
 
 def clean_url(url):
@@ -498,8 +499,7 @@ def tool_56_sensitive_file_scanner():
         except Exception: pass
 
 
-# --- SECTION 7: CLOUD, API & MOBILE SECURITY SUITE (NEW) ---
-
+# SECTION 7: Cloud, API & Mobile Security Suite
 def tool_57_s3_bucket_checker():
     print(Fore.CYAN + "[+] Cloud S3 Bucket Public Exposure Checker")
     name = input(Fore.YELLOW + "Enter company or app name to check s3 buckets: ").strip().lower().replace(" ", "")
@@ -772,17 +772,17 @@ def menu_cloud_api():
 def main():
     while True:
         banner()
-        print(Fore.CYAN + "=== ZEUSKIT v0.7.0 - MAIN CATEGORIES ===")
-        print(" [1] 🌐 Reconnaissance & Network Tools")
-        print(" [2] 🔐 Code, Decode & Cryptography Section")
-        print(" [3] 🔍 Web Analysis & OSINT Suite")
-        print(" [4] ⚡ Attacking & Brute-Force Section")
-        print(" [5] 🛠️ System Diagnostics & Utilities (Other)")
-        print(" [6] 🧪 Vulnerability & Injection Test Tools")
-        print(" [7] ☁️ Cloud, API & Mobile Security Suite")
+        print(Fore.CYAN + f"=== ZEUSKIT v0.8.0 - MAIN MENU ({TOTAL_TOOLS} TOOLS LOADED) ===")
+        print(" [1] 🌐 Reconnaissance & Network Tools        (14 Tools)")
+        print(" [2] 🔐 Code, Decode & Cryptography Section (12 Tools)")
+        print(" [3] 🔍 Web Analysis & OSINT Suite          ( 7 Tools)")
+        print(" [4] ⚡ Attacking & Brute-Force Section       ( 7 Tools)")
+        print(" [5] 🛠️ System Diagnostics & Utilities        (10 Tools)")
+        print(" [6] 🧪 Vulnerability & Injection Test Tools  ( 6 Tools)")
+        print(" [7] ☁️ Cloud, API & Mobile Security Suite    ( 6 Tools)")
         print("[67] Check for GitHub Updates")
         print(" [0] Exit ZeusKit")
-        print("--------------------------------------------------")
+        print("--------------------------------------------------------------------")
         
         choice = input(Fore.YELLOW + "ZeusKit > Main Menu: ").strip()
         
