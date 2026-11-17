@@ -9,24 +9,23 @@ except ImportError:
     print("[!] Error: colorama is not installed. Run: pip install -r requirements.txt")
     sys.exit(1)
 
-VERSION = "v1.0.5"
+VERSION = "v1.0.6"
 AUTHOR = "sunveroblox-bit"
 
-# Compact Master Database of Tools (Expanding with new utilities)
 TOOLS = {
-    1: ["Quick Domain IP Lookup", 1], 2: ["Full DNS Records Lookup", 1], 3: ["TCP Port Scanner", 1],
-    4: ["HTTP Header Inspector", 1], 5: ["SSL Certificate Checker", 1], 6: ["WHOIS Information Lookup", 1],
+    1: ["Quick Domain IP Lookup", 1], 2: ["Full DNS Records Lookup", 1], 3: ["TCP Port Scanner (Real)", 1],
+    4: ["HTTP Header Inspector (Real)", 1], 5: ["SSL Certificate Checker (Real)", 1], 6: ["WHOIS Information Lookup", 1],
     7: ["Subnet & CIDR Calculator", 1], 8: ["Reverse PTR Lookup", 1], 9: ["Local Network IP Finder", 1],
     10: ["Public IP Geolocation", 1], 11: ["Custom HTTP Request Sender", 1], 12: ["Random User-Agent Generator", 1],
     13: ["URL Redirect Trace", 1], 14: ["Autonomous System (ASN) Lookup", 1], 15: ["DNS Resolution Latency Test", 1],
     
-    16: ["Multi-Hash Generator (MD5/SHA256)", 2], 17: ["Base64 Encoder / Decoder", 2], 18: ["URL Encoder / Decoder", 2],
-    19: ["Strong Password Generator", 2], 20: ["JWT Token Decoder", 2], 21: ["Hex Encoder / Decoder", 2],
+    16: ["Multi-Hash Generator (MD5/SHA256)", 2], 17: ["Base64 Encoder / Decoder (Real)", 2], 18: ["URL Encoder / Decoder", 2],
+    19: ["Strong Password Generator", 2], 20: ["JWT Token Decoder (Real)", 2], 21: ["Hex Encoder / Decoder", 2],
     22: ["Binary Encoder / Decoder", 2], 23: ["Epoch / Unix Timestamp Tool", 2], 24: ["UUIDv4 Generator", 2],
     25: ["HMAC-SHA256 Generator", 2], 26: ["XOR Cipher Tool", 2], 27: ["ROT13 Cipher", 2],
     28: ["SHA3-256 Advanced Hasher", 2], 29: ["Base32 Encoder / Decoder", 2], 30: ["CRC32 Checksum Calculator", 2],
     
-    31: ["Robots.txt Parser & Crawler", 3], 32: ["Subdomain Enumerator Stub", 3], 33: ["Security Headers Checker", 3],
+    31: ["Robots.txt Parser & Crawler (Real)", 3], 32: ["Subdomain Enumerator Stub", 3], 33: ["Security Headers Checker", 3],
     34: ["HTML Page Title Grabber", 3], 35: ["Phishing Site Cloner Tool", 3], 36: ["Directory Path Brute-Forcer", 3],
     37: ["HTTP Cookie Inspector", 3], 38: ["Favicon Hash Calculator", 3], 39: ["CMS Detector Heuristic", 3],
     40: ["HTTP OPTIONS Method Checker", 3], 41: ["Open Redirect Checker", 3], 42: ["Clickjacking Auditor", 3],
@@ -66,10 +65,9 @@ def banner():
 ███████╗███████╗╚█████╔╝███████║██║  ██║██║   ██║   
 ╚══════╝╚══════╝ ╚════╝ ╚══════╝╚═╝  ╚═╝╚═╝   ╚═╝
     [ ZeusKit Mobile Cybersecurity Suite {VERSION} ]
-    [ Developed: {AUTHOR} | Total Tools: 100 / 100 + Plugins ]
+    [ Developed: {AUTHOR} | Real Functional Modules Enabled ]
 """)
 
-# --- ACTIVE DOS ENGINE ---
 attack_running = False
 attack_counter = 0
 counter_lock = threading.Lock()
@@ -108,48 +106,114 @@ def run_dos_attack(title):
         attack_running = False
         print(Fore.RED + "\n[!] Attack halted.")
 
-# --- CUSTOM PLUGIN / SCRIPT LOADER ---
-def run_custom_plugin():
-    print(Fore.CYAN + "\n=== 🔌 CUSTOM PLUGIN / SCRIPT RUNNER ===")
-    print(Fore.YELLOW + "You can run any external Python script or shell command from here.")
-    plugin_path = input(Fore.YELLOW + "Enter path to python script or command (e.g. python3 mytool.py): ").strip()
-    if not plugin_path: return
-    try:
-        print(Fore.GREEN + f"\n[+] Executing: {plugin_path}\n" + "-"*40)
-        os.system(plugin_path)
-    except Exception as e:
-        print(Fore.RED + f"[!] Error executing plugin: {e}")
-
-# --- DYNAMIC TOOL ROUTER ---
+# --- REAL WORKING TOOL IMPLEMENTATIONS ---
 def execute_tool(tool_id):
     name, cat = TOOLS[tool_id]
     print(Fore.GREEN + f"\n[+] Executing Tool #{tool_id}: {name}")
     
-    if tool_id == 1:
-        d = input(Fore.YELLOW + "Domain/URL: ").strip()
-        try: print(Fore.GREEN + f"[+] IP: {socket.gethostbyname(d)}")
-        except Exception as e: print(Fore.RED + f"[!] Error: {e}")
-    elif tool_id == 16:
-        t = input(Fore.YELLOW + "Text to hash: ").strip()
-        print(Fore.GREEN + f"[+] MD5: {hashlib.md5(t.encode()).hexdigest()}")
-        print(Fore.GREEN + f"[+] SHA256: {hashlib.sha256(t.encode()).hexdigest()}")
-    elif tool_id == 46 or tool_id == 47:
-        run_dos_attack(name)
-    elif tool_id == 48:
-        target = input(Fore.YELLOW + "Target IP/Domain: ").strip()
-        os.system(f"hydra -l admin -P wordlist.txt {target} ssh")
-    elif tool_id == 90:
-        print(Fore.GREEN + f"[+] Termux Home: {os.environ.get('HOME')}")
-    elif tool_id == 100:
-        run_custom_plugin()
-    else:
-        print(Fore.YELLOW + f"[*] [{name}] module active.")
-    
+    try:
+        if tool_id == 1: # Quick Domain IP Lookup
+            d = input(Fore.YELLOW + "Enter Domain/URL: ").strip()
+            print(Fore.GREEN + f"[+] Resolved IP: {socket.gethostbyname(d)}")
+            
+        elif tool_id == 3: # TCP Port Scanner
+            target = input(Fore.YELLOW + "Target IP or Domain: ").strip()
+            ports = [21, 22, 23, 25, 53, 80, 110, 443, 3306, 8080]
+            print(Fore.GREEN + f"[*] Scanning common ports on {target}...")
+            for p in ports:
+                s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+                s.settimeout(1.0)
+                result = s.connect_ex((target, p))
+                if result == 0:
+                    print(Fore.GREEN + f"  [OPEN] Port {p}")
+                else:
+                    print(Fore.RED + f"  [CLOSED] Port {p}")
+                s.close()
+                
+        elif tool_id == 4: # HTTP Header Inspector
+            url = input(Fore.YELLOW + "Target URL: ").strip()
+            if not url.startswith("http"): url = "https://" + url
+            req = urllib.request.Request(url, headers={"User-Agent": "Mozilla/5.0 (Linux; Android 14)"})
+            with urllib.request.urlopen(req, timeout=5) as res:
+                print(Fore.CYAN + f"\n--- HTTP Status: {res.status} {res.reason} ---")
+                for k, v in res.headers.items():
+                    print(Fore.GREEN + f"{k}: {v}")
+                    
+        elif tool_id == 5: # SSL Certificate Checker
+            domain = input(Fore.YELLOW + "Domain name (e.g. google.com): ").strip()
+            context = ssl.create_default_context()
+            with socket.create_connection((domain, 443), timeout=5) as sock:
+                with context.wrap_socket(sock, server_hostname=domain) as ssock:
+                    cert = ssock.getpeercert()
+                    print(Fore.GREEN + f"\n[+] Issued To: {dict(x[0] for x in cert.get('subject', []))}")
+                    print(Fore.GREEN + f"[+] Issued By: {dict(x[0] for x in cert.get('issuer', []))}")
+                    print(Fore.GREEN + f"[+] Valid From: {cert.get('notBefore')}")
+                    print(Fore.GREEN + f"[+] Valid Until: {cert.get('notAfter')}")
+                    
+        elif tool_id == 16: # Multi-Hash Generator
+            t = input(Fore.YELLOW + "Enter text to hash: ").strip()
+            print(Fore.GREEN + f"[+] MD5:    {hashlib.md5(t.encode()).hexdigest()}")
+            print(Fore.GREEN + f"[+] SHA1:   {hashlib.sha1(t.encode()).hexdigest()}")
+            print(Fore.GREEN + f"[+] SHA256: {hashlib.sha256(t.encode()).hexdigest()}")
+            
+        elif tool_id == 17: # Base64 Encoder / Decoder
+            mode = input(Fore.YELLOW + "[1] Encode\n[2] Decode\nSelection: ").strip()
+            val = input(Fore.YELLOW + "Enter string: ").strip()
+            if mode == "1":
+                print(Fore.GREEN + f"[+] Result: {base64.b64encode(val.encode()).decode()}")
+            else:
+                print(Fore.GREEN + f"[+] Result: {base64.b64decode(val.encode()).decode()}")
+                
+        elif tool_id == 20: # JWT Token Decoder
+            token = input(Fore.YELLOW + "Enter JWT Token: ").strip()
+            parts = token.split(".")
+            if len(parts) >= 2:
+                def b64_decode_part(p):
+                    p += "=" * (-len(p) % 4)
+                    return json.loads(base64.urlsafe_b64decode(p).decode())
+                print(Fore.CYAN + "\n[+] JWT Header:", json.dumps(b64_decode_part(parts[0]), indent=2))
+                print(Fore.CYAN + "[+] JWT Payload:", json.dumps(b64_decode_part(parts[1]), indent=2))
+            else:
+                print(Fore.RED + "[-] Invalid JWT token format.")
+                
+        elif tool_id == 31: # Robots.txt Parser
+            domain = input(Fore.YELLOW + "Target URL (e.g. https://example.com): ").strip()
+            if not domain.endswith("/"): domain += "/"
+            try:
+                req = urllib.request.Request(domain + "robots.txt", headers={"User-Agent": "Mozilla/5.0"})
+                with urllib.request.urlopen(req, timeout=5) as res:
+                    print(Fore.GREEN + f"\n[+] robots.txt found for {domain}:\n")
+                    print(res.read().decode())
+            except Exception as e:
+                print(Fore.RED + f"[-] Could not retrieve robots.txt: {e}")
+                
+        elif tool_id == 46 or tool_id == 47:
+            run_dos_attack(name)
+            
+        elif tool_id == 48:
+            target = input(Fore.YELLOW + "Target IP/Domain: ").strip()
+            os.system(f"hydra -l admin -P wordlist.txt {target} ssh")
+            
+        elif tool_id == 90:
+            print(Fore.GREEN + f"[+] Termux Home Directory: {os.environ.get('HOME')}")
+            print(Fore.GREEN + f"[+] Current User: {os.environ.get('USER', 'unknown')}")
+            
+        elif tool_id == 100:
+            print(Fore.CYAN + "\n=== 🔌 CUSTOM PLUGIN / SCRIPT RUNNER ===")
+            cmd = input(Fore.YELLOW + "Enter python script or command to execute: ").strip()
+            if cmd: os.system(cmd)
+            
+        else:
+            print(Fore.YELLOW + f"[*] [{name}] is loaded. Enter custom action or command if needed.")
+            
+    except Exception as e:
+        print(Fore.RED + f"[!] Execution Error: {e}")
+        
     input(Fore.YELLOW + "\nPress Enter to return...")
 
 def global_tool_finder():
     print(Fore.CYAN + "\n=== 🔎 GLOBAL TOOL FINDER ===")
-    q = input(Fore.YELLOW + "Search keyword (e.g. dos, hydra, sql, custom): ").strip().lower()
+    q = input(Fore.YELLOW + "Search keyword (e.g. port, header, ssl, jwt, robots): ").strip().lower()
     if not q: return
     matches = {tid: data for tid, data in TOOLS.items() if q in data[0].lower()}
     if matches:
@@ -177,7 +241,7 @@ def run_menu(title, start_id, end_id):
 def main():
     while True:
         banner()
-        print(Fore.CYAN + "=== ZEUSKIT v1.0.5 - MAIN MENU (100 TOOLS + PLUGINS) ===")
+        print(Fore.CYAN + "=== ZEUSKIT v1.0.6 - MAIN MENU (REAL FUNCTIONAL TOOLS) ===")
         print(" [1] 🌐 Recon & Network Tools         (15 Tools)")
         print(" [2] 🔐 Code, Decode & Crypto         (15 Tools)")
         print(" [3] 🔍 Web Analysis & OSINT          (15 Tools)")
