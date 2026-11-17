@@ -19,12 +19,12 @@ def banner():
 ███████╗███████╗╚█████╔╝███████║██║  ██║██║   ██║   
 ╚══════╝╚══════╝ ╚════╝ ╚══════╝╚═╝  ╚═╝╚═╝   ╚═╝
     [ ZeusKit Mobile Cybersecurity Suite {VERSION} ]
-    [ Architecture: Modular Open-Source Wrapper Framework ]
+    [ Architecture: 100% Open-Source Termux Wrappers ]
 """)
 
 def global_tool_finder():
     print(Fore.CYAN + "\n=== 🔎 GLOBAL TOOL FINDER ===")
-    q = input(Fore.YELLOW + "Search keyword: ").strip().lower()
+    q = input(Fore.YELLOW + "Search keyword (e.g. nmap, sqlmap, dirsearch, hydra): ").strip().lower()
     if not q: return
     matches = {tid: data for tid, data in TOOLS.items() if q in data[0].lower()}
     if matches:
@@ -52,7 +52,7 @@ def run_menu(title, start_id, end_id):
 def main():
     while True:
         banner()
-        print(Fore.CYAN + f"=== ZEUSKIT {VERSION} - MAIN MENU (OPEN-SOURCE WRAPPERS) ===")
+        print(Fore.CYAN + f"=== ZEUSKIT {VERSION} - MAIN MENU (OPEN-SOURCE SUITE) ===")
         print(" [1] 🌐 Recon & Network Tools         (15 Tools)")
         print(" [2] 🔐 Code, Decode & Crypto         (15 Tools)")
         print(" [3] 🔍 Web Analysis & OSINT          (15 Tools)")
