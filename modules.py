@@ -25,7 +25,7 @@ TOOLS = {
     
     46: ["Bayustore22 Python DoS Framework (HTTP Flood)", 4], 47: ["Multi-Threaded HTTP DDoS Stress Tester", 4], 
     48: ["Hydra Brute-Force Wrapper 🔥", 4], 49: ["Hash Dictionary Cracker", 4], 50: ["Netcat Reverse Shell Helper", 4],
-    51: ["XSS Payload Generator", 4], 52: ["Sqlmap Injection Framework (Open Source)", 4], 53: ["LFI Path Traversal Payloads", 4],
+    51: ["XSS Payload Generator", 5], 52: ["Sqlmap Injection Framework (Open Source)", 4], 53: ["LFI Path Traversal Payloads", 4],
     54: ["Reverse Shell Generator One-Liners", 4], 55: ["FTP Anonymous Login Tester", 4], 56: ["Telnet Default Credential Tester", 4],
     57: ["SSH Banner Version Auditor", 4], 58: ["DNS Zone Transfer Attack Simulator", 4], 59: ["HTTP Basic Auth Brute-Forcer", 4], 60: ["Web Form Brute-Forcer", 4],
     
@@ -93,7 +93,7 @@ def execute_tool(tool_id):
         if tool_id == 1:
             d = input(Fore.YELLOW + "Enter Domain/URL: ").strip()
             print(Fore.GREEN + f"[+] Resolved IP: {socket.gethostbyname(d)}")
-        elif tool_id == 3: # Nmap Wrapper
+        elif tool_id == 3:
             target = input(Fore.YELLOW + "Target IP or Domain for Nmap: ").strip()
             print(Fore.YELLOW + "[*] Running open-source tool: nmap -F " + target)
             os.system(f"nmap -F {target}")
@@ -104,12 +104,7 @@ def execute_tool(tool_id):
             with urllib.request.urlopen(req, timeout=5) as res:
                 print(Fore.CYAN + f"\n--- Status: {res.status} ---")
                 for k, v in res.headers.items(): print(Fore.GREEN + f"{k}: {v}")
-        elif tool_id == 17:
-            mode = input(Fore.YELLOW + "[1] Encode\n[2] Decode\nSelection: ").strip()
-            val = input(Fore.YELLOW + "Enter string: ").strip()
-            if mode == "1": print(Fore.GREEN + f"[+] Result: {base64.b64encode(val.encode()).decode()}")
-            else: print(Fore.GREEN + f"[+] Result: {base64.b64decode(val.encode()).decode()}")
-        elif tool_id == 35: # Dirsearch Wrapper
+        elif tool_id == 35:
             url = input(Fore.YELLOW + "Target URL for Dirsearch: ").strip()
             print(Fore.YELLOW + "[*] Running open-source tool dirsearch...")
             os.system(f"dirsearch -u {url}")
@@ -118,15 +113,15 @@ def execute_tool(tool_id):
         elif tool_id == 48:
             target = input(Fore.YELLOW + "Target IP/Domain: ").strip()
             os.system(f"hydra -l admin -P wordlist.txt {target} ssh")
-        elif tool_id == 52: # Sqlmap Wrapper
-            url = input(Fore.YELLOW + "Target URL with parameter (e.g. http://example.com/page.php?id=1): ").strip()
+        elif tool_id == 52:
+            url = input(Fore.YELLOW + "Target URL with parameter: ").strip()
             print(Fore.YELLOW + "[*] Running open-source tool sqlmap...")
             os.system(f"sqlmap -u '{url}' --batch")
         elif tool_id == 100:
             cmd = input(Fore.YELLOW + "Enter external tool command or script path: ").strip()
             if cmd: os.system(cmd)
         else:
-            print(Fore.YELLOW + f"[*] [{name}] wrapper ready. Ensure package is installed via pkg install.")
+            print(Fore.YELLOW + f"[*] [{name}] wrapper ready.")
     except Exception as e:
         print(Fore.RED + f"[!] Execution Error: {e}")
     input(Fore.YELLOW + "\nPress Enter to return...")
